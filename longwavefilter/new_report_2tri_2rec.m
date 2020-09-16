@@ -110,7 +110,10 @@ MulFilter = 1.036*Tri1-0.036*Tri2+0.25*(Rec1-Rec2);
 
 % test
 % MulFilter = Tri1-Tri2+Rec1-Rec2;
-ensco1 = 1 - MulFilter;
+ensco1 = 1 - MulFilter;         %%这个为什么是这样的
+
+ensco1 = MulFilter;
+
 Acc = ensco1;
 [tridb, maxV, minV, BW, slope] = filter_para(Acc);
 end

@@ -24,11 +24,15 @@ size(wave_out);
 N = length(fmctrl_data);
 x = 0:0.25:0.25*(N-1);
 x = x/1000;
+
 %% 轨距的对比
+chaogao = wave_out(:,6);
+
 % ****************参数设定*********************
 delay = 418;%%一直是这个数吗？
-G = 9.8;
-ht = 0;
+%%这两个参数是啥意思？这两个量是准确的
+G_par = 3.8259e-14*141500.0;
+ht = 3.90398e-05*141500.0*0.268;
 
 tbs = fmctrl_data(:,end);
 tbs_s = tbs/1e5;
@@ -36,12 +40,12 @@ tbs_s = tbs/1e5;
 rou_l = fmctrl_data(:,9);
 rou_r = fmctrl_data(:,11);
 
-rou_l = rou_l/(129.01);
-rou_r = rou_r/(129.01);
+% rou_l = rou_l/(129.01);
+% rou_r = rou_r/(129.01);
 
 for i = 3:length(rou_l)
-    rou_l_dot2(i) = rou_l(i) - 2*rou_l(i-1) + rou_l(i-2);
-    rou_r_dot2(i) = rou_r(i) - 2*rou_r(i-1) + rou_r(i-2);
+    rou_l_dot2(i,1) = rou_l(i) - 2*rou_l(i-1) + rou_l(i-2);
+    rou_r_dot2(i,1) = rou_r(i) - 2*rou_r(i-1) + rou_r(i-2);
 end
 
 
@@ -51,45 +55,53 @@ ay = fmctrl_data(:,5);
 
 % ---------------------- 经过滤波器 --------------------
 for i = 1:length(ay)
-    ay_Fz(i) = F(ay(i),tbs(i));         %%filter out
-    ay_Rz(i) = R(ay_Fz(i),tbs(i));      %%filter out
-    ay_Gz(i) = G(ay_Rz(i),tbs(i));      %%filter out
+    ay_Gz(i,1) = G(ay(i) , tbs(i));
 end
-
-
-figure;plot(ay_Gz);hold on;
-plot(ay);legend 1 2
-
 
 %% 频谱观察
-plot_mag(ay,'滤波前')
-plot_mag(ay_Gz,'滤波后')
-
-
+% plot_mag(ay,'滤波前')
+% plot_mag(ay_Fz,'滤波后')
+% plot_mag(wave_out(:,3),'左轨向')
+% 
 %% 积分
+% sita_b = sita_b/3276.8/180*pi;
+sita_b = aln(:,4);
 for i = 3:length(sita_b)
-    sita_b_dot2 = sita_b(i) - 2*sita_b(i-1) + sita_b(i-2);
+    sita_b_dot2(i,1) = sita_b(i) - 2*sita_b(i-1) + sita_b(i-2);
 end
 
-camo = ay_Gz.*tbs.^2 - G .* sita_b .* tbs.^2 + ht*sita_b_dot2;
+camo = ay_Gz - G_par .* sita_b .* tbs.^2 + ht*sita_b_dot2;
+camo = -camo;
+
 yL_dot2 = camo - rou_l_dot2;
 yR_dot2 = camo + rou_r_dot2;
 
 
 x_dot = 0;
 x = 0;
+
 for i = 3:length(yL_dot2)           %%简单积分，肯定是不对的
-    x_dot = x_dot + yL_dot2(i);
-    x = x + x_dot;
-    yL(i) = x;
+    x_dot = x_dot + yL_dot2(i)*tbs(i);
+    x = x + x_dot*tbs(i);
+    yL(i,1) = x;
 end
 
-%% 轨向的波形频谱
 
+% 目前只有积分是存在问题的
+
+%% 结果对比
+
+figure;plot(camo(30:end));hold on;
+plot(aln(:,1));
+legend 1 2
+
+figure;plot(yL);
+
+
+
+%% 轨向的波形频谱
 aln_l = wave_out(:,3);
 aln_r = wave_out(:,4);
-plot_mag(aln_l,'左轨向波形');
-% figure;plot(x,aln_l,x,aln_r);
 
 function out = F(x,tbs)
 %% 滤波器设定
@@ -108,6 +120,7 @@ y(1) = y(2);
 y(2) = y(3);
 out = y(3);
 end
+
 
 function out = R(x_k,tbs)
 wd = 0.001;
@@ -141,11 +154,11 @@ x(3) = x_k;
 tbs(2) = tbs_k;
 
 %% 离散滤波
-x_dot = x(3)-x(2);
-x_dot_2 = x(3) - 2*x(2) + x(3);
-y1(2) = (x(3) - x(2)) *tbs(2)/2^15 + x_dot;
+x_dot = x(3) - x(2);
+x_dot_2 = x(3) - 2*x(2) + x(1);
+y1(2) = (x(3) + x(2)) *tbs(2)/2^15 + x_dot;
+y = (y1(2)+y1(1))* (tbs(2) + tbs(1))/2^16 + x_dot_2;
 
-y = (y1(2)+y1(1))* (tbs(2)-tbs(1))/2^16 + x_dot_2;
 
 %% 更新temp量
 y1(1) = y1(2);

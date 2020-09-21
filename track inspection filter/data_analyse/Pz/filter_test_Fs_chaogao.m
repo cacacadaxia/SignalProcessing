@@ -17,7 +17,9 @@
 %  功能： 1.Hz没啥问题
 %        2.Fz没问题
 %        3. 顺便验证了超高的第一部分
-% 
+%        4. 超高的第二部分
+%        5. 低通滤波器已经差不多完成，虽然有一些不一致的地方（尤其是刚开始的那一段）
+%               初步认为是与初始化相关
 % 
 %--------------------------------------------------------------------------
 
@@ -33,16 +35,6 @@ if length(tmp2)>N
     tmp2 = tmp2(1:N,:);
 end
 gpro = tmp2(:,1);
-
-%% 读取yaw rate
-tmp3 = textread('fmctrl_data_1337.txt');
-if length(tmp3)>N
-    tmp3 = tmp3(1:N,:);
-end
-yaw = tmp3(:,6);
-gpin = tmp3(:,4);
-
-
 %% 读取dtemp
 dtemp_comp = textread('tmp_dtemp.txt');
 if length(dtemp_comp)>N
@@ -57,8 +49,28 @@ dt4 = dtemp_comp(:,5);
 dt = dtemp_comp(:,6);
 frt_ = dtemp_comp(:,7);
 frct_ = dtemp_comp(:,8);
+%% 读取yaw rate
+tmp3 = textread('fmctrl_data_1337.txt');
+if length(tmp3)>N
+    tmp3 = tmp3(1:N,:);
+end
+yaw = tmp3(:,6);
+gpin = tmp3(:,4);
+%%
+tmp4 = textread('Hz_filter_inc.txt');
+if length(tmp4)>N
+    tmp4 = tmp4(1:N,:);
+end
+inc_comp = tmp4(:,1);
+lfcrp_comp = tmp4(:,3);
+%%
+tmp5 = textread('Bz_filter.txt');
+if length(tmp5)>N
+    tmp5 = tmp5(1:N,:);
+end
+gpin_2 = tmp5(:,1);
+infp_2 = tmp5(:,2);
 %% 导入数据
-
 tmp = textread('fz_filter_gaodi.txt');
 if length(tmp)>N
     tmp = tmp(1:N,:);
@@ -69,7 +81,6 @@ dt74 = gpvro/2-gpvlo/2;
 fd74 = -dt74;
 result = tmp(:,4);
 
-
 %% 计算
 hight = 3.820;
 fim = 0.820210;
@@ -77,12 +88,12 @@ dgyro = 6.56;
 fim1 = 1.2192;
 compf = -1;
 mfd12 = -374.08;
-
 scali = 1230.2646;
 mytbp = [];
 dincl = 2.320;
 
-%% 经过打印确定过后的
+%% 经过打印，确定过后的参数
+%% 这里的参数就是因为很多代码冗余，所以改起来很费劲
 hight = 1.8;
 scali = 1230.264648;
 dincl = 1.32;
@@ -96,36 +107,31 @@ for i = 2:length(result)
     frt(i,1) = gpro(i) - frct(i);
     % ----------------------------------
     dtemp = fim * tbs * yaw(i) * compf;
-    d1(i,1) = dtemp;
     mytb = tbs * (yaw(i) - yaw(i-1));
-    d(i,1) = mytb;
     dtemp = dtemp - dgyro * tbs * (yaw(i) - yaw(i-1));
-    d2(i,1) = dtemp;
     if isempty(mytbp)
         mytbp = mytb;
     end
     
     dtemp = dtemp + fim1 * mfd12 *(mytb - mytbp );
-    d3(i,1) = dtemp;
     dtemp = dtemp + hight*tbs*(frt(i) - frt(i-1));
-    d4(i,1) = dtemp;
-    dtemp = scali*(dtemp+dincl*tbs*(  frct(i) - frct(i-1) ));
-    d0(i,1) = dtemp;
+    dtemp = scali*(dtemp + dincl * tbs * (  frct(i) - frct(i-1) ));
     
     %%
     out2(i,1) = dtemp;
-    out(i,1) = F_xiuzheng(dtemp,tbs);
-    
+    dtmp_Fz = F_xiuzheng(dtemp,tbs);    %%这个好像有问题？
+    out(i,1) = dtmp_Fz;
     
     %% next step
     
-    
-    
-    
+    infp = B(gpin(i),tbs);
+    infp_save(i,1) = infp;
+    inc = 0.5 * infp + dtmp_Fz;
+    inc_save(i,1) = inc;
+    lfcrp(i,1) = H3z(inc,tbs);
     
     %% update
-    mytbp = mytb;
-    
+    mytbp = mytb;%%就这一个数比较不好弄
 end
 
 %% 结果对比
@@ -134,7 +140,10 @@ figure;plot(out);hold on;plot(result);
 legend myresult gjresult;
 
 figure;plot(out - result);
+figure;plot(lfcrp_comp - lfcrp);
+figure;plot(inc_comp - inc_save);%%这两个有区别，所以后面的就有区别
 
+figure;plot(dt0-out2);
 %% 超高相关函数
 
 function out = filter_1_unknow(x_k,tbs)
@@ -144,7 +153,7 @@ if isempty(x)
     y = zeros(2,1);
 end
 sd74 = 82281.94545;
-sd74 = 126376.6875;
+sd74 = 126376.6875;     %%这才是正解
 x(2) = x_k;
 x_dot = x(2) - x(1);
 %%
@@ -314,7 +323,6 @@ x_dot = x(3)-x(2);
 x_dot_2 = x(3) - 2*x(2) + x(1);
 y1(2) = (x(3) + x(2)) *tbs(2)/2^15 + x_dot;
 y = (y1(2)+y1(1))* (tbs(2) + tbs(1))/2^16 + x_dot_2;
-
 
 %% 更新temp量
 y1(1) = y1(2);

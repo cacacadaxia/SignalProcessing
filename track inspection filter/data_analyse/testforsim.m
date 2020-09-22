@@ -19,20 +19,20 @@
 %% 1 对左高低数据进行处理
 %% 读取数据
 %% 左高低数据
-% clear all;
-d = textread('gplpe.txt');
-d = d/129.01;
+% % clear all;
+% d = textread('gplpe.txt');
+% d = d/129.01;
 
 %% 对采集的信号进行处理，然后再滤波
 %% 现在的fs始终都是4Hz，需要注意长波与时间的对应关系
 lamda = 100;        %%d
-omega = 2*pi/lamda;
-l = length(d);
-data.time = 0:0.25:((l-1)*0.25);
-
-for i=1:length(d)
-    dtp(i) = d(i) + i/1000;
-end
+% omega = 2*pi/lamda;
+% l = length(d);
+% data.time = 0:0.25:((l-1)*0.25);
+% 
+% for i=1:length(d)
+%     dtp(i) = d(i) + i/1000;
+% end
 
     %% 滤波
     % b = Num;
@@ -89,7 +89,7 @@ end
 
 %% 3.读取所有的数据
 %% 对于所有的数据进行分析，最好是可以在matlab中搭建出整个模型
-load_txt
+load_txt;
 sensor_data = fmctrl_data;
 figure;plot(sensor_data);
 

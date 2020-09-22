@@ -1,6 +1,8 @@
 close all
 clear
 clc
+%% 是不是就是Fs和Gz两个滤波器？
+%% 
 % 二阶butterworth抗混滤波器
 % 时域幅频特性
 a = 10^5 / 2^14;
@@ -37,9 +39,9 @@ title('二阶抗混滤波器空间域幅频特性曲线');
 h1=legend('1:v=16km/h','2:v=36km/h','3:v=128km/h');
 set(h1,'Box','off');            
 
-% 二阶抗混滤波器对应的补偿滤波器
+%% 二阶抗混滤波器对应的补偿滤波器
+%% 应该是重新设计了滤波器
 % 补偿滤波器
-
 w = 0.0001 : 0.0001 :10;           %空间波长 1m ~ 1000m
 v = 16/3.6;
 t = 0.25/v;
@@ -80,32 +82,32 @@ set(h1,'Box','off');           %不显示方框
 
 
 
-%% 这个对比不一定对
+%% 这个对比不一定对，所以暂时不去考虑就是了
 figure;semilogx(1./w,20*log10(Djw1.*Fs1),1./w,20*log10(Djw2.*Fs2),'b',1./w,20*log10(Djw3.*Fs3));
-hold on;
-a = 10^5 / 2^14;
-f = 0.0001 : 0.0001 :10;        % 模拟频率Hz
-omiga = 2 * pi .* f;              % 模拟角频率 rad/sec
-Fs1   = a^2 ./((1j.*omiga).^2 + 1j.*omiga*a + a^2);
-semilogx(1./f,20*log10(Fs1));
-legend;
-xlabel('WaveLength m')
-ylabel('Mag dB')
+% hold on;
+% a = 10^5 / 2^14;
+% f = 0.0001 : 0.0001 :10;        % 模拟频率Hz
+% omiga = 2 * pi .* f;              % 模拟角频率 rad/sec
+% Fs1   = a^2 ./((1j.*omiga).^2 + 1j.*omiga*a + a^2);
+% semilogx(1./f,20*log10(Fs1));
+% legend;
+% xlabel('WaveLength m')
+% ylabel('Mag dB')
 
 
-%%
-figure;
-%空间频率
-pesi = 0.0001 : 0.0001 : 10;     %空间波长 1m ~ 1000m
-v   = 3.6/3.6;
-Fs1 = (a^2+b^2) ./(-(2*pi*pesi*v).^2 + 2*1j*a*2*pi.*pesi*v + (a^2+b^2));
-semilogx(1./w,20*log10(Fs1));
-hold on;
-a = 10^5 / 2^14;
-f = 0.0001 : 0.0001 :10;        % 模拟频率Hz
-omiga = 2 * pi .* f;              % 模拟角频率 rad/sec
-Fs1   = a^2 ./((1j.*omiga).^2 + 1j.*omiga*a + a^2);
-semilogx(1./f,20*log10(Fs1));
-legend;
-xlabel('WaveLength m')
-ylabel('Mag dB')
+% %%
+% figure;
+% %空间频率
+% pesi = 0.0001 : 0.0001 : 10;     %空间波长 1m ~ 1000m
+% v   = 3.6/3.6;
+% Fs1 = (a^2+b^2) ./(-(2*pi*pesi*v).^2 + 2*1j*a*2*pi.*pesi*v + (a^2+b^2));
+% semilogx(1./w,20*log10(Fs1));
+% hold on;
+% a = 10^5 / 2^14;
+% f = 0.0001 : 0.0001 :10;        % 模拟频率Hz
+% omiga = 2 * pi .* f;              % 模拟角频率 rad/sec
+% Fs1   = a^2 ./((1j.*omiga).^2 + 1j.*omiga*a + a^2);
+% semilogx(1./f,20*log10(Fs1));
+% legend;
+% xlabel('WaveLength m')
+% ylabel('Mag dB')

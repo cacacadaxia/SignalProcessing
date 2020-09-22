@@ -160,7 +160,7 @@ for i=1:N
     Rec2(i)= ((sin(w(i)*M4/2)/sin(w(i)/2))/M4);
 end
 % 并联的系数
-MulFilter = 1.036*Tri1-0.036*Tri2+0.25*(Rec1-Rec2);
+MulFilter = 1.036*Tri1 - 0.036*Tri2 + 0.25*(Rec1-Rec2);
 % a = 1.0;
 % b = 1.0;
 % MulFilter = Tri1+a*0.036*(Tri1-Tri2)+b*0.25*(Rec1-Rec2);

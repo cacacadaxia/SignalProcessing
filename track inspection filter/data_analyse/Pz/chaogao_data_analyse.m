@@ -204,29 +204,41 @@ legend gj 直接积分
 
 % figure;plot(gyro/pi*180);legend 1 2 3%%感觉这里的单位是错误的，尤其是角速度的单位
 
+%%
+
+sita_bt = dt74*scalr;
+figure;plot(sita_bt/32.2520/100);%%sita_bt只有0.1度？
+
+
 %% 惯组
 gyroll = tmp3(:,1)/3276.8/180*pi;
 gypitch = tmp3(:,2)/3276.8/180*pi;
 gyyaw = tmp3(:,6)/3276.8/180*pi;
-accx = tmp3(:,3)/129.01;
+accx = tmp3(:,3)/129.01;%%这单位到底是什么？
 accy = tmp3(:,4)/129.01;
 accz = tmp3(:,7)/129.01;
 
-yaw = 0;
+yaw = 0;pitch = 0; roll = 0;
 for i = 1:length(gyyaw)
    gyyaw_ = gyyaw(i);
+   gyroll_ = gyroll(i);
+   gypitch_ = gypitch(i);
    tbs = tmp(i,2)/1e5;
    yaw = yaw + tbs*gyyaw_;
+   pitch = pitch + tbs*gypitch_;
+   roll = roll + tbs*gyroll_;
    yaw_save(i) = yaw;
+   pitch_save(i) = pitch;
+   roll_save(i) = roll;
 end
-
 figure;plot(yaw_save/pi*180);
-
+figure;plot(pitch_save/pi*180);
+figure;plot(roll_save/pi*180);
 %%这里的问题是直接对yaw的积分是十分不准确的，相当于列车在1km之内转弯为70度，那是非
 %%常离谱的，待后续修改
 
-
 %% 角速度积分
+%% 角度积分依然存在问题
 gyro = [gyroll,gypitch,gyyaw];
 angle = zeros(1,3);
 for t = 2:length(gyro)
@@ -235,10 +247,36 @@ for t = 2:length(gyro)
     del = cau_w(ang_k(1),ang_k(2),ang_k(3))*gyro(t,:)';
     angle(t,:) = (ang_k + del.'*tbs);
 end
-figure;plot(angle/pi*180);%%deg
+figure;plot(angle(:,1)/pi*180);%%deg，这就是积分带来的问题？
+hold on;
+plot(gpxbr)
 legend 1 2 3
 
-% figure;plot(gyro);legend 1 2 3
+
+%% 加速度积分
+TBS = tmp(:,2);
+
+
+v = 0.25./(TBS./1e5);
+for i = 21:length(v)
+    tbs = TBS(i)/1e5;
+    a(i) = (v(i) - v(i-20)) / tbs / 20;
+end
+
+
+v_ac = 0;
+for i = 2:length(accx)
+    accx_ = accx(i);
+    tbs = TBS(i)/1e5;
+    v_ac(i) = v_ac(i-1)+accx_*tbs;
+end
+
+
+
+
+
+%% 函数
+ % figure;plot(gyro);legend 1 2 3
 function W = cau_w(fai,sita,psi)
 W = [1,sin(fai)*tan(sita) , cos(fai)*tan(sita);
     0, cos(fai) ,       -sin(fai);

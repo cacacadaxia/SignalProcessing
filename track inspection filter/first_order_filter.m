@@ -12,6 +12,8 @@ xlabel('模拟频率 (Hz)');
 ylabel('dB');            % 截止频率为 0.76/2/pi = 0.121Hz
 title('一阶抗混滤波器');
 
+
+%% 讨论速度的影响
 %不同速度下，一阶模拟抗混滤波器幅频特性
 %速度为16km/h 36km/h 128km/h
 lamda = 1:0.001:10000;        %波长
@@ -31,6 +33,15 @@ xlabel('空间频率(1/m)' );
 ylabel('幅值(dB)');
 legend('16km/h','36km/h','128km/h');
  
+%% 这里的方法值得学习一下
+%% s = 1j*(2*pi*v.*pesi)
+%% z^-1 = exp(-1j*2*pi.*pesi*v*Ti)
+%% z = exp(1j*2*pi.*pesi*v*Ti);
+%% 
+%% 上面是有速度v的表达式
+%% 如果没有v，则如下：
+%% 参考论文：数字滤波技术在轨道检测中的应用
+%% 
 % % 一阶数字滤波器
 % % 将模拟滤波器转化为数字滤波器 反向差分法
 % T = 0.002;
@@ -47,24 +58,29 @@ legend('16km/h','36km/h','128km/h');
 % ylabel('幅值(dB)');
 % legend('16km/h','36km/h','128km/h');
 
+
+%%
 %一阶数字补偿滤波器
-%超越方程的系数不利于简化
+% 超越方程的系数不利于简化
 v    = 16;
+v    = v/3.6;
 Ti   = 0.25/v;
 par1 = omiga1 * Ti;
 B1 = ( (1+par1/2)-(1-par1/2).*exp(-1j*2*pi.*pesi*v*Ti) ) ./ par1;
 
 v    = 36;
+v    = v/3.6;
 Ti   = 0.25/v;
 par1 = omiga1 * Ti;
 B2 = ( (1+par1/2)-(1-par1/2).*exp(-1j*2*pi.*pesi*v*Ti) ) ./ par1;
 
 v    = 128;
+v    = v/3.6;
 Ti   = 0.25/v;
 par1 = omiga1 * Ti;
 B3 = ( (1+par1/2)-(1-par1/2).*exp(-1j*2*pi.*pesi*v*Ti) ) ./ par1;
 
-figure
+figure;
 semilogx(pesi,20*log10(B1),pesi,20*log10(B2),pesi,20*log10(B3));
 title ('补偿滤波器空间域频响特性');
 xlabel('空间频率(1/m)' );

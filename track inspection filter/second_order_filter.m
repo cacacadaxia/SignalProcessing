@@ -6,11 +6,14 @@ a = k/2;
 b = (k^2-a^2)^(1/2);
 
 v   = 16;
+v   = v/3.6;
 pesi= 0.0001 : 0.0001 : 10;
 Fs1 = (a^2+b^2) ./(-(2*pi*pesi*v).^2 + 2*1j*a*2*pi.*pesi*v + (a^2+b^2));
 v   = 72;
+v   = v/3.6;
 Fs2 = (a^2+b^2) ./(-(2*pi*pesi*v).^2 + 2*1j*a*2*pi.*pesi*v + (a^2+b^2));
 v   = 128;
+v   = v/3.6;
 Fs3 = (a^2+b^2) ./(-(2*pi*pesi*v).^2 + 2*1j*a*2*pi.*pesi*v + (a^2+b^2));
 
 %% 补偿滤波器
@@ -57,6 +60,8 @@ h1=legend('1:v=16km/h','2:v=36km/h','3:v=128km/h');
 set(h1,'Box','off');            %不显示方框
 grid on
 
+
+%% 互补滤波器加上抗混叠滤波器
 figure
 semilogx(w,20*log10(Djw1.*Fs1),w,20*log10(Djw2.*Fs2),w,20*log10(Djw3.*Fs3));
 ylabel('dB ');
@@ -65,7 +70,6 @@ h1=legend('1:v=16km/h','2:v=36km/h','3:v=128km/h');
 set(h1,'Box','off');            %不显示方框
 grid on
 
-%% 角频率是啥意思？
 
 
 

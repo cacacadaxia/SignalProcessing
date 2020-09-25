@@ -20,19 +20,19 @@
 % load_txt;
 close all;
 clear all;
-
+filepath = 'data/0916_1337_x/';
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);
 x = 0:0.25:0.25*(N-1);
 x = x/1000;
 %%
-tmp5 = textread('tmp2.txt');
+tmp5 = textread([filepath,'tmp2.txt']);
 if length(tmp5)>N
     tmp5 = tmp5(1:N,:);
 end
 %%
-tmp2 = textread('tmp_zhongjian_1337.txt');
+tmp2 = textread([filepath,'tmp_zhongjian_1337.txt']);
 if length(tmp2)>N
     tmp2 = tmp2(1:N,:);
 end
@@ -93,9 +93,6 @@ camo = -camo;
 %%这里说明了camo测的不准，主要是ay有点问题吧
 amcol = camo + rou_l_dot2;
 amcor = camo - rou_r_dot2;
-%%
-marm = aln(:,5);
-g = aln(:,6);
 
  %%
 alu = 0;elupp = 0;elup = 0;elu = 0;als = 0;alss = 0;alsss = 0;
@@ -160,12 +157,15 @@ for i = 1:length(amcol)           %%简单积分，肯定是不对的
     elupp = alu;
     elup = elup + elupp;
     elu = elu + elup;
+    elu_save(i,1) = elu;
     emco = - amcol_array(in4);
 
     als = als + amcol_array(in2) - amcol_array(in6);
     
     alss = alss + als + sbsc*emco;
+    
     alsss = alsss + alss;
+    alsss_save(i) = alsss;
     xtemp = (alsss*sbsci - sscal*elu)*fscal;
     yL(i,1) = xtemp;
     
@@ -190,20 +190,9 @@ figure;plot((yL - aln(:,4)));%%基本完全一致
 title('左轨向的结果');
 
 %%
-for i=1:length(amcol)
-    yL_2(i) = integrational(amcol(i));
-end
-% figure;plot(yL_2);hold on;plot(aln(:,4));legend matlab gj
-
-%%
-ydot = 0;y = 0;
-for i=1:length(amcol)
-    ydot = ydot + amcol(i);
-    y = y + ydot;
-    y_L3(i) = ydot;
-end
-
-% figure;plot(y_L3);
+figure;plot(aln(:,4));
+hold on;
+plot(wave_out(:,3));
 
 function out = F(x,tbs)
 %% 滤波器设定

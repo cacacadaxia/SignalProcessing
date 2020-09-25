@@ -18,31 +18,31 @@
 % load_txt;
 close all;
 clear all;
-
+filepath = 'data/0916_1337_x/';
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);
 x = 0:0.25:0.25*(N-1);
 x = x/1000;
 %%
-tmp5 = textread('tmp2.txt');
+tmp5 = textread([filepath,'tmp2.txt']);
 if length(tmp5)>N
     tmp5 = tmp5(1:N,:);
 end
 %%
-tmp2 = textread('tmp_zhongjian_1337.txt');
+tmp2 = textread([filepath,'tmp_zhongjian_1337.txt']);
 if length(tmp2)>N
     tmp2 = tmp2(1:N,:);
 end
 % gpxbr,hfcra,lfcrp
 
-
 %% 轨距的对比
 chaogao = wave_out(:,6);
 
 % ****************参数设定*********************
-delay = 418;%%一直是这个数吗？
-%%这两个参数是啥意思？这两个量是准确的
+delay = 418; %%一直是这个数吗？不一定，每个测量项目对应的参数都不一样
+%% 这两个参数是啥意思？这两个量是准确的
+%% 确定这两个参数的含义
 G_par = 3.8259e-14*141500.0;
 ht = 3.90398e-05*141500.0*0.268;
 
@@ -180,7 +180,8 @@ figure;plot(l(:,1));
 %%
 % aln(:,4);
 figure;plot(yL,'LineWidth',1);hold on;plot(aln(:,4));legend 1 2
-figure;plot((yL - aln(:,4))/103);%%基本完全一致
+figure;plot((yL - aln(:,4))/103);%%基本完全一致，左轨向可以暂时先不用考虑了
+
 %% wave out (轨向和高低的画图)
 gaodi_l = wave_out(:,1)/129.01;
 guixiang_l = wave_out(:,3)/103.21;
@@ -190,6 +191,7 @@ aln_l = wave_out(:,3);
 aln_r = wave_out(:,4);
 
 function out = F(x,tbs)
+%% Fs的标准写法
 %% 滤波器设定
 %% 对于x[3]，其与同理
 % x(3)=x_n

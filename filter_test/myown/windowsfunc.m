@@ -10,27 +10,45 @@
 %   日期：2020年 9月23日
 %   作者：s.m.
 %--------------------------------------------------------------------------
-%  功能： 1.
+%  功能： 1.窗函数的画图，参考文档「高速线路轨道长波不平顺检测技术研究.docx」
 %        2.
 %        3. 
 %--------------------------------------------------------------------------
 
-
-% lamda = 1:0.001:1000;
-% psi = 1./lamda;
-M = 108;
+close all;
+clear all;
+%% 矩形窗
+M = 30;
 N = 2*M+1;
-N = 10000;
-psi = linspace(0,pi,N);
-Omega = 2.*pi.*psi.*0.25;
-Wn = sin(M.*psi/2)./sin(psi./2)./M;
+psi = linspace(0,pi,10000);
+Omega = 2.*pi./psi.*0.25;
+Wn = 1- sin(N.*psi/2)./sin(psi./2)./N;
 figure;semilogx(Omega,20*log10(abs(Wn)));
+grid on;
+%% 三角窗
+M = 30;
+N = 2*M+1;
+psi = linspace(0,pi,10000);
+Omega = 2.*pi./psi.*0.25;
+Wn = (sin(M*psi/2)./sin(psi/2)).^2/M^2;
+figure;semilogx(Omega,20*log10(abs(Wn)));
+grid on;
 
-%%
-% tmp = exp(j*2*pi*psi*0.25);
-% Wz =  (tmp.^M - tmp.^(-M-1))./(1-tmp.^(-1)) ./(2*M+1);
-% hold on;
-% semilogx(psi,Wz)
+
+
+%% 后端滤波器不考虑速度了？
+%% 这实现的有问题
+% lamda = 1:0.001:900;
+% psi = 1./lamda;
+% fs = 0.25;
+% z = exp(1j*2*pi*psi/fs);
+% Hz1 = 1/83*(z.^41 - z.^(-42))./( 1-z.^(-1) );
+% Hz2 = 1/249*( z.^124 - z.^(-125) )./(1 - z.^(-1));
+% Hz = 1 - Hz1 - 1/8*(Hz1 - Hz2);
+% figure;semilogx(lamda , Hz);
+
+
+
 
 
 

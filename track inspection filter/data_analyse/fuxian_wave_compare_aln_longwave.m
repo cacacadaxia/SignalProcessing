@@ -12,27 +12,24 @@
 %--------------------------------------------------------------------------
 %  功能： 1.首先复现最为简单的轨向部分
 %        2.加上滤波器的部分，并进行对比。主要是轨向，结果很好
-%        3. 修改积分的方法
+%        3. 修改积分的方法，但其实没有，就是把程序中的滤波简化了写法
 % 
 % 
 %--------------------------------------------------------------------------
-
-% load_txt;
 close all;
 clear all;
-
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);
 x = 0:0.25:0.25*(N-1);
 x = x/1000;
 %%
-tmp5 = textread('tmp2.txt');
+tmp5 = textread('data/0916_1337/tmp2.txt');
 if length(tmp5)>N
     tmp5 = tmp5(1:N,:);
 end
 %%
-tmp2 = textread('tmp_zhongjian_1337.txt');
+tmp2 = textread('data/0916_1337/tmp_zhongjian_1337.txt');
 if length(tmp2)>N
     tmp2 = tmp2(1:N,:);
 end
@@ -64,6 +61,19 @@ end
 
 % ******************step2 加速度计的滤波 **********************************
 ay = fmctrl_data(:,5);
+gpan = fmctrl_data(:,5);
+
+
+gpan = gpan/(1359.5241/0.01/9.83);
+figure;plot(gpan);
+x = 0;x_dot = 0;
+for i = 1:length(gpan)
+    x_dot = x_dot + gpan(i)*tbs(i);
+    x_dot_save(i) = x_dot;
+    x = x + x_dot*tbs(i);
+    x_save(i) = x;
+end
+
 
 % ---------------------- 经过滤波器 --------------------
 for i = 1:length(ay)
@@ -86,7 +96,6 @@ for i = 3:length(sita_b)
 end
 
 camo = ay_Gz - G_par .* sita_b .* tbs.^2 + ht * sita_b_dot2;
-
 %% 在这里进行修改
 gyroYaw = fmctrl_data(:,6);
 
@@ -112,10 +121,8 @@ gpyawRevise = gpyawReviseTemp1 + 0;
 
 camo = - gpyawRevise + ht * sita_b_dot2;
 camo = -camo;
-figure;plot(camo );
-hold on;
-figure;plot(aln(:,1));
-legend matlab gj
+camo = zeros(size(camo));%%极端情况，全部变成0
+% figure;plot(camo );hold on;plot(aln(:,1));legend matlab gj
 
 %% 只是进行这样简单的移植之后，发现其结果还是存在问题的，所以暂时先放一边
 %%
@@ -128,7 +135,8 @@ amcor = camo - rou_r_dot2;
 marm = aln(:,5);
 g = aln(:,6);
 
-figure;plot(amcol);hold on;plot(aln(:,3))
+figure;plot(amcol,'LineWidth',1);hold on;plot(aln(:,3));title('amcol之间的对比');legend matlab gj
+% figure;plot(amcol-aln(:,3));title('amcol之间的对比');
 
  %%
 alu = 0;elupp = 0;elup = 0;elu = 0;als = 0;alss = 0;alsss = 0;
@@ -146,8 +154,7 @@ amcol_arraytmp = zeros(Num,1);
 in1 = 533; in2 = 432;in4=382;in6=331;in7=230;%%这些参数都是固定的，不能变
 in = 539;%%控制偏移值
 
-%% 重新整理积分
-
+%%
 for i = 1:length(amcol)           %%简单积分，肯定是不对的
     %%
    amcol_array(in) = amcol(i);
@@ -164,7 +171,11 @@ for i = 1:length(amcol)           %%简单积分，肯定是不对的
     
     alss = alss + als + sbsc*emco;
     alsss = alsss + alss;
-    xtemp = (alsss*sbsci - sscal*elu)*fscal;
+    xtemp = (sbsci*alsss - sscal*elu)*fscal;
+    
+    alsss_save(i) = alsss;
+    elu_save(i) = elu;
+    alss_save(i) = alss;
     yL(i,1) = xtemp;
     
     %% 更新数组
@@ -182,33 +193,34 @@ for i = 1:length(amcol)           %%简单积分，肯定是不对的
 end
 
 %%
-% aln(:,4);
 figure;plot(yL,'LineWidth',1);hold on;plot(aln(:,4));legend matlab gj
-figure;plot((yL - aln(:,4)));%%基本完全一致
-title('左轨向的结果');
-
-%% 这里说明了其结果是一致的啊，怎么就还要积分了？
-guixiang_l = wave_out(:,3);
-figure;plot(guixiang_l(268:end),'LineWidth',1);
-hold on;
-plot(aln(:,4));
-
+figure;plot((yL - aln(:,4))/103);%%基本完全一致
+title('左轨向的结果(单位：mm)');
 %%
-for i=1:length(amcol)
-    yL_2(i) = integrational(amcol(i));
-end
-% figure;plot(yL_2);hold on;plot(aln(:,4));legend matlab gj
+figure;plot(alsss_save);hold on;plot(elu_save)
+%%  
+    % guixiang_l = wave_out(:,3);
+    % figure;plot(guixiang_l(268:end),'LineWidth',1);
+    % hold on;plot(aln(:,4));
+    % title('三点滤波的结果');
 
-%%
-ydot = 0;y = 0;
-for i=1:length(amcol)
-    ydot = ydot + amcol(i);
-    y = y + ydot;
-    y_L3(i) = ydot;
-end
+%% 所以这里的积分不重要，暂时不考虑
+    % for i=1:length(amcol)
+    %     yL_2(i) = integrational(amcol(i));
+    % end
+    
+%% 长波滤波器
 
-% figure;plot(y_L3);
 
+
+
+
+
+
+
+
+
+%% 前端滤波器
 function out = F(x,tbs)
 %% 滤波器设定
 %% 对于x[3]，其与同理
@@ -295,7 +307,6 @@ end
 
 %% 在长波滤波之后进行积分？
 function out = integrational(auat)
-
 persistent  euas euasp  auatp eusa;
 if isempty(euasp)
     euasp =  0;
@@ -320,4 +331,38 @@ end
 
 
 
+% %% 重新整理积分
+% 
+% for i = 1:length(amcol)           %%简单积分，肯定是不对的
+%     %%
+%    amcol_array(in) = amcol(i);
+%     %%由此可见就是输入出了问题，所以查找输入
+%     %%-----------------------------
+%     
+%     alu = alu + amcol_array(in1) - 3*amcol_array(in2) + 3*amcol_array(in6) - amcol_array(in7);
+%     elupp = alu;
+%     elup = elup + elupp;
+%     elu = elu + elup;
+%     emco = - amcol_array(in4);
+% 
+%     als = als + amcol_array(in2) - amcol_array(in6);
+%     
+%     alss = alss + als + sbsc*emco;
+%     alsss = alsss + alss;
+%     xtemp = (alsss*sbsci - sscal*elu)*fscal;
+%     yL(i,1) = xtemp;
+%     
+%     %% 更新数组
+%     in1 = mod(in1,Num)+1;
+%     in2 = mod(in2,Num)+1;
+%     in4 = mod(in4,Num)+1;
+%     in6 = mod(in6,Num)+1;
+%     in7 = mod(in7,Num)+1;
+%     in = mod(in,Num)+1;
+%     %%
+%     save(i,1) = alu;
+%     save(i,2) = elu;
+%     save(i,3) = als;
+%     save(i,4) = alsss;
+% end
 

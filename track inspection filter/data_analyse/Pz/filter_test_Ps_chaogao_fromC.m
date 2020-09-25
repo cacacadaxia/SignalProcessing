@@ -13,7 +13,7 @@
 %        2.不准的问题基本解决，但是在初始化的过程中出现的问题来自于：
 %               初始化做的不好
 %        3.滤波器的输出的初始化怎么办？不好弄
-%        4.
+%        4.高频的部分，是对陀螺仪进行滤波加积分
 %        5.
 %
 %--------------------------------------------------------------------------
@@ -144,7 +144,7 @@ for i = 4:length(tmp)
         ftrp2 = ftrp1;
         INILIZED = 1;
     end
-    t3=t3+cx4*(ftrp1+ftrp1-ftrp2+ftrp);
+    t3 = t3 + cx4*(ftrp1+ftrp1-ftrp2+ftrp);
     
     tmp4(i) = t3;
     tmp4_1(i,1) = ftrp1;
@@ -189,7 +189,7 @@ end
 
 
 % 
-figure;plot(tmp(:,3) - hfcra.');
+figure;plot(tmp(:,3) - ceil(hfcra).');
 figure;plot(tmp(:,3),'LineWidth',1);hold on;plot(hfcra)
 figure;plot(tp1'-tmp1);axis([1,10000,-10,10]);
 figure;plot(tp2'-tmp2);

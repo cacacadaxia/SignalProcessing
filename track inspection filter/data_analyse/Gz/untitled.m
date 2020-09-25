@@ -1,14 +1,23 @@
+
+
+
+clear all;
+close all;
+N = 10000;
 aln = textread('aln.txt');
 if length(aln)>N
     aln = aln(1:N,:);
 end
 
 for i =1:length(aln)
-    out(i) = G(aln(i,1),aln(i,2));
+    out(i,1) = G(aln(i,1),aln(i,2));
 end
 figure;plot(out(30:end));hold on;
 plot(aln(:,3))
 legend 1 2
+
+
+figure;plot(out - aln(:,3));
 
 function out = G(x_k,tbs_k)
 persistent x y1 tbs;
@@ -17,6 +26,7 @@ if isempty(x)
     y1 = zeros(2,1);
     tbs = zeros(2,1);
 end
+
 %% ¸üÐÂkÊ±¿Ì
 x(3) = x_k;
 tbs(2) = tbs_k;

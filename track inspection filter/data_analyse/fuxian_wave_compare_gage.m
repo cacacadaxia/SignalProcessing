@@ -18,7 +18,7 @@
 % load_txt;
 close all;
 clear all;
-
+filepath = 'data/0916_1337_x/';
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);

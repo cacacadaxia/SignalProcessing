@@ -23,7 +23,7 @@
 
 
 close all;
-
+clear all;
 wd = 0.001;
 b = [1-wd,-1+wd];
 a = [1,-1+wd];
@@ -62,20 +62,22 @@ Ls = 0.25;
 Rz = (1-wd)*(1- exp(-j*2*pi*psi*0.25))./( 1-(1-wd)*exp(-j*2*pi*psi*0.25) );
 hold on;semilogx(lamda,20*log10(Rz),'LineWidth',1);
 
-
 %%
-
 tmp = 2*(1-wd)^2*(1-cos(2*pi.*psi*0.25))./( 1+ (1-wd)^2 -2*(1-wd)*cos(2*pi.*psi*0.25) );
 Rz2 = 10*log10(tmp);
 %% bode
 figure;semilogx(1./psi , 20*log10(Rz),'r--','LineWidth',1);
 hold on;semilogx(1./psi , Rz2,'LineWidth',1);
 
-
-
-
-
-
-
+%% 采样率不是一个问题吗？
+%% 模拟了一个freqz的过程
+psi = 0:0.001:900;
+fs = 1000;
+wd = 0.001;
+Ls = 0.25;
+Rz = (1-wd)*(1- exp(-j*2*pi*psi/fs))./( 1-(1-wd)*exp(-j*2*pi*psi/fs) );
+figure;semilogx(psi,20*log10(Rz),'LineWidth',1);
+[h,f] = freqz(b,a,1e5,fs);
+hold on;semilogx(f,20*log10(h),'--r','LineWidth',2)
 
 

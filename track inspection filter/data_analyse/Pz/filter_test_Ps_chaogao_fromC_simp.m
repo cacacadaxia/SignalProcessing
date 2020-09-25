@@ -166,7 +166,8 @@ for i =1:length(tmp)
     gpro_Pz = P3z(gpro,tbs);
     out(i) = gpro_Pz;
 end
-figure;plot(out);hold on;figure;plot(frlp_save);
+figure;plot(out);hold on;
+figure;plot(frlp_save);
 
 
 

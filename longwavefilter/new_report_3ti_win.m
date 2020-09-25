@@ -5,7 +5,7 @@
 
 % =========================================================================
 %
-%                   长波滤波器远离探究
+%                   长波滤波器原理探究
 %
 % =========================================================================
 %
@@ -99,7 +99,6 @@ for i=1:N
     Trap2(i)= ((sin(w(i)*Kt1/2)/sin(w(i)/2))/Kt1)*((sin(w(i)*Kt2/2)/sin(w(i)/2))/Kt2);
     Trap3(i)= ((sin(w(i)*St1/2)/sin(w(i)/2))/St1)*((sin(w(i)*St2/2)/sin(w(i)/2))/St2);
 end
-
 %% test
 
 % figure;semilogx(2*pi.*w./4,Trap1);
@@ -107,10 +106,11 @@ end
 Trap = w1.*Trap1+w2.*Trap2+w3.*Trap3;
 Acc = 1 - Trap;
 %% 最简单的滤波器
-figure;semilogx(2*pi./w./4 , abs((sin(w*Mt1/2)./sin(w/2))./Mt1));
-% Acc1 = 1- Trap1;
-% Acc2 = 1- Trap2;
-% Acc3 = 1- Trap3;
+    figure;semilogx(2*pi./w./4 , (abs((sin(w*Mt1/2)./sin(w/2))./Mt1)));
+    figure;semilogx(2*pi./w./4 , (1-  Trap ));
+            % Acc1 = 1- Trap1;
+            % Acc2 = 1- Trap2;
+            % Acc3 = 1- Trap3;
 ensco1 = Acc;
 [tridb, maxV, minV, BW, slope] = filter_para(Acc);
 end

@@ -274,7 +274,9 @@ y2_true = wave_out(:,3);
 
 %%
 figure;plot(y1);hold on;plot(y2);title('长波滤波器之后')
-figure;plot(y1_true);hold on;plot(y2_true);title('25米以下的波长数据对比')
+figure;plot(y1_true(1:end));hold on;plot(y2_true(3:end));title('25米以下的波长数据对比');legend 1 2
+
+
 %% 函数
 function out = F(x,tbs)
 %% 滤波器设定

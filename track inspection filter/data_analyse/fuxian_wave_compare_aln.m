@@ -12,27 +12,30 @@
 %--------------------------------------------------------------------------
 %  功能： 1.首先复现最为简单的轨向部分
 %        2.加上滤波器的部分，并进行对比。主要是轨向，结果很好
-%        3. 
+%        3. 初始化就是差分的初始化带来的区别，其他的没什么
+% 
+% 
 %--------------------------------------------------------------------------
 
 % load_txt;
 close all;
 clear all;
 filepath = 'data/0916_1337_x/';
+start_pos = 1;
+N = 10000;
 load_txt;
 size(wave_out);
-N = length(fmctrl_data);
 x = 0:0.25:0.25*(N-1);
 x = x/1000;
 %%
 tmp5 = textread([filepath,'tmp2.txt']);
 if length(tmp5)>N
-    tmp5 = tmp5(1:N,:);
+    tmp5 = tmp5(start_pos:start_pos+N-1,:);
 end
 %%
 tmp2 = textread([filepath,'tmp_zhongjian_1337.txt']);
 if length(tmp2)>N
-    tmp2 = tmp2(1:N,:);
+    tmp2 = tmp2(start_pos:start_pos+N-1,:);
 end
 % gpxbr,hfcra,lfcrp
 
@@ -54,7 +57,10 @@ rou_r = fmctrl_data(:,11);
 
 % rou_l = rou_l/(129.01);
 % rou_r = rou_r/(129.01);
-
+rou_l_dot2(1,1) = rou_l(1);
+rou_r_dot2(1,1) = rou_r(1);
+rou_l_dot2(2,1) = rou_l(2) - 2*rou_l(1);
+rou_r_dot2(2,1) = rou_r(2) - 2*rou_r(1);
 for i = 3:length(rou_l)
     rou_l(i) = rou_l(i)*2;
     rou_r(i) = rou_r(i)*2;
@@ -74,31 +80,31 @@ end
 % plot_mag(ay,'滤波前')
 % plot_mag(ay_Fz,'滤波后')
 % 
-figure;plot(aln(:,2)-ay_Gz);
+% figure;plot(aln(:,2)-ay_Gz);
 
 
 %% 积分
 % sita_b = sita_b/3276.8/180*pi;
 sita_b = tmp2(:,1);
+sita_b_dot2(2,1) = sita_b(2)-sita_b(1) - sita_b(1);
+sita_b_dot2(1,1) = sita_b(1);
 for i = 3:length(sita_b)
     sita_b_dot2(i,1) = sita_b(i) - 2*sita_b(i-1) + sita_b(i-2);
 end
 
 camo = ay_Gz - G_par .* sita_b .* tbs.^2 + ht * sita_b_dot2;
 camo = -camo;
-% camo = floor(camo);%%这里说明了取整带来了问题
-camo = aln(:,1);%%好像是随机取整吧
+camo = quzheng(camo);%%这里说明了取整带来了问题
+% camo = aln(:,1);%%好像是随机取整吧
 %%这里说明了camo测的不准，主要是ay有点问题吧
 amcol = camo + rou_l_dot2;
 amcor = camo - rou_r_dot2;
 %%
 marm = aln(:,5);
-g = aln(:,6);
 figure;plot(marm - ht * sita_b_dot2);
-figure;plot(g - G_par .* sita_b .* tbs.^2 );
  %%
  figure;plot( amcol - aln(:,3));
- figure;plot(ceil(camo) - aln(:,1));
+ figure;plot(camo - aln(:,1));
  %%
 alu = 0;elupp = 0;elup = 0;elu = 0;als = 0;alss = 0;alsss = 0;
 sscal = 0.000825;
@@ -169,14 +175,14 @@ end
 % figure;plot(amcol_array_tmp - tmp5(:,1:5));
 % figure;plot(camo - aln(:,1));
 %% alu elu als alsss
-tmp4 = textread('tmp1.txt');
-if length(tmp4)>N
-    tmp4 = tmp4(1:N,:);
-end
-l = tmp4 - save;
-figure;plot(l);
-legend 1 2 3 4
-figure;plot(l(:,1));
+    % tmp4 = textread([filepath,'tmp1.txt']);
+    % if length(tmp4)>N
+    %     tmp4 = tmp4(start_pos:start_pos+N-1,:);
+    % end
+    % l = tmp4 - save;
+    % figure;plot(l);
+    % legend 1 2 3 4
+    % figure;plot(l(:,1));
 %%
 % aln(:,4);
 figure;plot(yL,'LineWidth',1);hold on;plot(aln(:,4));legend 1 2
@@ -274,11 +280,16 @@ title(tit);
 end
 
 
-
-
-
-
-
+function out = quzheng(in)
+out = zeros(2,1);
+for i = 1:length(in)
+    if in(i)>=0
+        out(i) = floor(in(i));
+    elseif in(i)<0
+        out(i) = floor(in(i)) + 1;
+    end
+end
+end
 
 
 

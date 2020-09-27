@@ -12,7 +12,8 @@
 %--------------------------------------------------------------------------
 %  功能： 1.首先复现最为简单的轨向部分
 %        2.加上滤波器的部分，并进行对比。主要是轨向，结果很好
-%        3. 修改积分的方法
+%        3. 修改积分的方法，实际上就是换了一种写法，没多少变化
+%       4. 0927：初始化的问题没有解决，这是为什么？
 % 
 % 
 %--------------------------------------------------------------------------
@@ -21,6 +22,7 @@
 close all;
 clear all;
 filepath = 'data/0916_1337_x/';
+start_pos = 1;N = 1e4;
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);
@@ -29,12 +31,12 @@ x = x/1000;
 %%
 tmp5 = textread([filepath,'tmp2.txt']);
 if length(tmp5)>N
-    tmp5 = tmp5(1:N,:);
+    tmp5 = tmp5(start_pos:start_pos+N-1,:);
 end
 %%
 tmp2 = textread([filepath,'tmp_zhongjian_1337.txt']);
 if length(tmp2)>N
-    tmp2 = tmp2(1:N,:);
+    tmp2 = tmp2(start_pos:start_pos+N-1,:);
 end
 % gpxbr,hfcra,lfcrp
 
@@ -76,7 +78,7 @@ end
 % plot_mag(ay,'滤波前')
 % plot_mag(ay_Fz,'滤波后')
 % 
-% figure;plot(aln(:,2)-ay_Gz);
+figure;plot(aln(:,2)-ay_Gz);
 
 
 %% 积分
@@ -88,6 +90,7 @@ end
 
 camo = ay_Gz - G_par .* sita_b .* tbs.^2 + ht * sita_b_dot2;
 camo = -camo;
+camo = quzheng(camo);
 % camo = floor(camo);%%这里说明了取整带来了问题
 % camo = aln(:,1);%%好像是随机取整吧
 %%这里说明了camo测的不准，主要是ay有点问题吧
@@ -110,41 +113,6 @@ amcol_arraytmp = zeros(Num,1);
 in1 = 533; in2 = 432;in4=382;in6=331;in7=230;%%这些参数都是固定的，不能变
 in = 539;%%控制偏移值
 
-
-%% 旧的积分
-% for i = 1:length(amcol)           %%简单积分，肯定是不对的
-%     %%
-% %     amcol = aln(:,3);
-%    amcol_array(in) = amcol(i);
-%     %%由此可见就是输入出了问题，所以查找输入
-%     %%-----------------------------
-%     
-%     alu = alu + amcol_array(in1) - 3*amcol_array(in2) + 3*amcol_array(in6) - amcol_array(in7);
-%     elupp = alu;
-%     elup = elup + elupp;
-%     elu = elu + elup;
-%     emco = - amcol_array(in4);
-%     als = als + amcol_array(in2) - amcol_array(in6);
-%     alss = alss + als;
-%     alss = alss + sbsc*emco;
-%     alsss = alsss + alss;
-%     xtemp = (alsss*sbsci - sscal*elu)*fscal;
-%     yL(i,1) = xtemp;
-%     
-%     %% 更新数组
-%     in1 = mod(in1,Num)+1;
-%     in2 = mod(in2,Num)+1;
-%     in4 = mod(in4,Num)+1;
-%     in6 = mod(in6,Num)+1;
-%     in7 = mod(in7,Num)+1;
-%     in = mod(in,Num)+1;
-%     %%
-%     save(i,1) = alu;
-%     save(i,2) = elu;
-%     save(i,3) = als;
-%     save(i,4) = alsss;
-%      
-% end
 %% 重新整理积分
 
 for i = 1:length(amcol)           %%简单积分，肯定是不对的
@@ -186,13 +154,14 @@ end
 %%
 % aln(:,4);
 figure;plot(yL,'LineWidth',1);hold on;plot(aln(:,4));legend matlab gj
-figure;plot((yL - aln(:,4)));%%基本完全一致
+n = N;
+figure;plot((yL(1:n) - aln(1:n,4)));%%基本完全一致
 title('左轨向的结果');
 
 %%
 figure;plot(aln(:,4));
-hold on;
-plot(wave_out(:,3));
+hold on;plot(wave_out(:,3));title('唯一决定两者之间区别的就是两者的延时')
+
 
 function out = F(x,tbs)
 %% 滤波器设定
@@ -211,8 +180,6 @@ y(1) = y(2);
 y(2) = y(3);
 out = y(3);
 end
-
-
 function out = R(x_k,tbs)
 wd = 0.001;
 
@@ -231,7 +198,6 @@ y(1) = y(2);
 out = y(2);
 
 end
-
 function out = G(x_k,tbs_k)
 persistent x y1 tbs;
 if isempty(x)
@@ -259,7 +225,6 @@ tbs(1) = tbs(2);
 out = y;
 
 end
-
 function plot_mag(signal_data , tit)
 figure;
 fs = 4;     %% 0.25m为一个采样间隔
@@ -275,9 +240,6 @@ set(gca,'Fontname','Times New Roman','fontsize',16);
 title(tit);
 
 end
-
-
-
 %% 在长波滤波之后进行积分？
 function out = integrational(auat)
 
@@ -300,9 +262,16 @@ auatp = auat;
 euasp = euas;
 
 end
-
-
-
+function out = quzheng(in)
+out = zeros(2,1);
+for i = 1:length(in)
+    if in(i)>=0
+        out(i) = floor(in(i));
+    elseif in(i)<0
+        out(i) = floor(in(i)) + 1;
+    end
+end
+end
 
 
 

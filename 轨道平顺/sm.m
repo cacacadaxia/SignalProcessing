@@ -1,0 +1,45 @@
+function [Nf]=sm()
+v=100/3.6;%列车运行速度
+delta=0.0001;%时间间隔
+Nr=2^17;%时域和频域采样点数
+df=1/(Nr*delta);%频域采样间隔
+fu=v/0.5;%上截止频率
+fl=v/50;%下截止频率
+Nf=fix((fu-fl)/df);%有效频率段内的采样点数
+No=round(fl/df);%下截止频率以下点数
+t=zeros(1,No);%下截止频率以下点数置为零
+m=zeros(1,Nr/2-Nf-No);%上截止频率到Nf置为零
+f=linspace(fl,fu,Nf);%将上下截止频率之间等分Nf份
+fc=82.45/(7.2*pi);%截断频率对应的时间频率
+S=0.25*0.0339*(fc)^2*100/3.6./(2*pi*f.^2.*(f.^2+(fc)^2));%美国六级谱对应的公式
+Sx=[t,S,m,0];%补全采样点
+k=Nr/2+1;
+dfai=rand(1,k)*2*pi;%角度在0~2pi间均匀分布
+Y=exp(dfai*i);%独立相位序列
+Xk1=Nr*Y.*sqrt(Sx*df);%频谱
+Xk2=Xk1(2:k-1);
+Xk3=rot90(real(Xk2),2);
+Xk4=rot90(imag(Xk2),2);
+Xk5=Xk3-i*Xk4;
+Xk=[Xk1,Xk5];%补全频谱
+x=ifft(Xk,Nr);%傅立叶逆变换求时域样本
+figure
+plot(0.0001*(1:64:Nr),x(1:64:Nr));%画时域样本
+title('模拟的时间序列','fontsize',25)
+xlabel('时间/s','fontsize',20)
+ylabel('高低不平顺幅值/cm','fontsize',20)
+Sxn=(abs(Xk)/Nr).^2/df;
+Kn=No+1:No+Nf;
+f=Kn*df;
+figure;
+loglog(f,Sxn(Kn),'b-.');%绘制由时域样本得到的功率谱曲线
+hold on
+f=linspace(fl,fu,Nf);
+fc=82.45/(7.2*pi);%截断频率对应的时间频率
+S=0.25*0.0339*(fc)^2*100/3.6./(2*pi*f.^2.*(f.^2+(fc)^2));
+loglog(f,S);%绘制解析谱线
+grid on
+title('不平顺解析值与模拟值的比较','fontsize',25)
+xlabel('频率/Hz','fontsize',20)
+ylabel('功率谱密度/(cm2/Hz)','fontsize',20)
+legend('模拟值','解析值')

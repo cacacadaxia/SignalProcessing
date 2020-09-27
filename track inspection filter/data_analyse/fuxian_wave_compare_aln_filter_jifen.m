@@ -21,7 +21,8 @@
 
 close all;
 clear all;
-filepath = 'data/0916_1337_x/';
+filepath = 'data/0916_1337_x/';start_pos = 1;
+N = 9996;
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);
@@ -30,17 +31,11 @@ x = x/1000;
 
 %%
 tmp5 = textread([filepath,'tmp2.txt']);
-if length(tmp5)>N
-    tmp5 = tmp5(1:N,:);
-end
+tmp5 = tmp5(start_pos:start_pos+N-1,:);
 %%
 tmp2 = textread([filepath,'tmp_zhongjian_1337.txt']);
-if length(tmp2)>N
-    tmp2 = tmp2(1:N,:);
-end
+tmp2 = tmp2(start_pos:start_pos+N-1,:);
 % gpxbr,hfcra,lfcrp
-
-
 %% 轨距的对比
 chaogao = wave_out(:,6);
 
@@ -73,7 +68,6 @@ ay = fmctrl_data(:,5);
 for i = 1:length(ay)
     ay_Gz(i,1) = G(ay(i) , tbs(i));
 end
-
 %% 积分
 % sita_b = sita_b/3276.8/180*pi;
 sita_b = tmp2(:,1);
@@ -83,6 +77,7 @@ end
 
 camo = ay_Gz - G_par .* sita_b .* tbs.^2 + ht * sita_b_dot2;
 camo = -camo;
+camo = quzheng(camo);
 % camo = floor(camo);%%这里说明了取整带来了问题
 % camo = aln(:,1);%%好像是随机取整吧
 %%这里说明了camo测的不准，主要是ay有点问题吧
@@ -226,13 +221,13 @@ amcor = camo - rou_r_dot2;
 yL = yL/5;%%除以固定的系数，然后得到轨向的值
 %%
 % aln(:,4);
-figure;plot([yL(126:end)],'LineWidth',1);hold on;plot(aln(:,4));legend matlab gj
+figure;plot([yL(126:end)],'LineWidth',1);hold on;plot(aln(:,4));legend matlab70m gj25m;title('matlab计算的70m长波与25m左轨向对比')
 % figure;plot((yL - aln(:,4)));%%基本完全一致
-title('左轨向的结果');
 %% 这里有个问题，这个延时是怎么确定的？为什么126？是相对于25m波长的126
 
 %% 25m,70m,120m
 tmp7 = textread([filepath,'LongWaveResultForAln_L.txt']);
+tmp7 = tmp7(start_pos:start_pos+N-1,:);
 longwave25m = tmp7(:,1);
 longwave70m = tmp7(:,2);
 % longwave120m = tmp7(:,3);
@@ -240,10 +235,12 @@ for i = 1:length(yL)
     yL(i) = point3filter(yL(i));
 end
 figure;plot(longwave70m);hold on;plot([zeros(143,1);yL]);legend gj matlab
+
 %% 观察频谱(这种方法有点问题)
 plot_mag(longwave25m/103,'gj中给出的轨向 25m');
 plot_mag(longwave70m/103,'gj中给出的轨向 70m','hold');
-plot_mag(yL/103,'matlab中给出的轨向 70m','hold');legend 25m 70m 70m/matlab
+plot_mag(yL/103,'matlab中给出的轨向 70m','hold');legend gj25m gj70m 70m/matlab;
+
 
 
 %% 函数
@@ -314,6 +311,7 @@ out = y;
 end
 
 function plot_mag(signal_data , tit , varargin)
+
 if (nargin == 3)
     mode = varargin{1};
     if mode == 'hold'
@@ -339,6 +337,7 @@ end
 
 %% 参考别的方法
 function plot_mag1(signal_data , tit , varargin)
+%% 波长实际上就是周期
 if (nargin == 3)
     mode = varargin{1};
     if mode == 'hold'
@@ -409,5 +408,14 @@ x(1) = x(2);
 x(2) = x(3);
 
 end
-
+function out = quzheng(in)
+out = zeros(2,1);
+for i = 1:length(in)
+    if in(i)>=0
+        out(i) = floor(in(i));
+    elseif in(i)<0
+        out(i) = floor(in(i)) + 1;
+    end
+end
+end
 

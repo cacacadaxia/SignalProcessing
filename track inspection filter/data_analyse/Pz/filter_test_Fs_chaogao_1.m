@@ -11,15 +11,14 @@
 %
 %　(C)2019-2022 铁道科学研究院-基础所
 %   版本：V1.0
-%   日期：2020年 9月18日
+%   日期：2020年 9月28日
 %   作者：s.m.
 %--------------------------------------------------------------------------
-%  功能： 1.Hz没啥问题
-%        2.Fz没问题
-%        3. 顺便验证了超高的第一部分
-%        4. 超高的第二部分
-%        5. 低通滤波器已经差不多完成，虽然有一些不一致的地方（尤其是刚开始的那一段）
-%               初步认为是与初始化相关
+%  功能： 1.超高的对比，模型的简化
+%        2.
+%        3. 
+%  注意：
+%        1.只要是和角速度相关的都需要注意comp
 % 
 %--------------------------------------------------------------------------
 
@@ -77,86 +76,92 @@ if length(tmp)>N
 end
 gpvlo = tmp(:,1);
 gpvro = tmp(:,2);
-dt74 = gpvro/2-gpvlo/2;
+dt74 = gpvro/2-gpvlo/2;%%为什么是除以2
 fd74 = -dt74;
 result = tmp(:,4);
 
 %% 计算
 %% 这些参量分别都是什么意思？
 hight = 3.820;
-fim = 0.820210;
-dgyro = 6.56;
-fim1 = 1.2192;
+fim = 0.820210;     %%0.25/0.3048 1feet等于0.3048m
+dgyro = 6.56;       %%陀螺的位置
 compf = -1;
-mfd12 = -374.08;
 scali = 1230.2646;
 mytbp = [];
-dincl = 2.320;
+sd74 = 126376.6875;     %%这才是正解，这是啥意思？
 
 %% 经过打印，确定过后的参数
 %% 这里的参数就是因为很多代码冗余，所以改起来很费劲
-hight = 1.8;
+hight = 1.8;         %%feet   
 scali = 1230.264648;
-dincl = 1.32;
-mfd12 = -14.344533;
+dincl = 1.32;       %%倾角计到转向架的距离
+mfd12 = -(dgyro*2)*(dgyro*2)/12;%%why？不是很懂
+yaw_dotp = 0;
 for i = 2:length(result)
     % ---------------------------------
     tbs = tmp(i,3);
-    frct(i,1) = filter_1_unknow(fd74(i), tbs);
-    frt(i,1) = gpro(i) - frct(i);
+    fd74_dot = (fd74(i) - fd74(i-1))*sd74;
+    fd74_diff = fd74_dot/tbs;
+    w_bt(i,1) = filter_1_unknow(fd74_dot , tbs);
+%     w_bt(i,1) = B(fd74_diff*sd74,tbs);
+    w_bt_dot = w_bt(i,1) - w_bt(i-1,1);
+    wt(i,1) = gpro(i) - w_bt(i);
+    wt_dot = wt(i,1) - wt(i-1,1);
+    yaw_dot = yaw(i) - yaw(i-1);
+    yaw_dot2 = yaw_dot - yaw_dotp;
     % ----------------------------------
-    dtemp = fim * tbs * yaw(i) * compf;
-    mytb = tbs * (yaw(i) - yaw(i-1));
-    dtemp = dtemp - dgyro * tbs * (yaw(i) - yaw(i-1));
-    if isempty(mytbp)
-        mytbp = mytb;
-    end
-    
-    dtemp = dtemp + fim1 * mfd12 *(mytb - mytbp );
-    dtemp = dtemp + hight*tbs*(frt(i) - frt(i-1));
-    dtemp = scali*(dtemp + dincl * tbs * (  frct(i) - frct(i-1) ));
+    % 这是一个很复杂的量，逻辑就是将所有的量都转换成为feet就好了
+    dtemp = fim  * yaw(i) * compf / tbs;%% wz -->(fim -- 0.25变成 feet )
+    dtemp = dtemp - dgyro * yaw_dot / tbs;%% L*s*F(s)-->(yaw_dot / tbs代表微分diff)
+%     dtemp = dtemp +  mfd12 * yaw_dot2 / fim / tbs;%%不要也罢
+    dtemp = dtemp + hight  * wt_dot / tbs;%% ht*s*F(s) %% wt_dot / tbs-->(wt_dot / tbs 代表微分diff)
+    dtemp = scali * ( dtemp + dincl * w_bt_dot / tbs);%% -->( w_bt_dot / tbs 代表微分diff)
     
     %%
-    out2(i,1) = dtemp;
-    dtmp_Fz = F_xiuzheng(dtemp,tbs);    %%这个好像有问题？
-    out(i,1) = dtmp_Fz;
+    dtmp_Fz = F(dtemp,tbs);    %%这个好像有问题？
     
     %% next step
     
     infp = B(gpin(i),tbs);
     infp_save(i,1) = infp;
     inc = 0.5 * infp + dtmp_Fz;
-    inc_save(i,1) = inc;
     lfcrp(i,1) = H3z(inc,tbs);
     
     %% update
-    mytbp = mytb;%%就这一个数比较不好弄
+    yaw_dotp = yaw_dot;
 end
+
+%%
+% %% 新的超高
+% for i = 2:length(result)
+% 
+%     tbs = tmp(i,3)/1e5;
+%     
+% end
+
+
 
 %% 结果对比
 
-figure;plot(out);hold on;plot(result);
-legend myresult gjresult;
-
-figure;plot(out - result);
+% figure;plot(out);hold on;plot(result);legend matlab gj;
 figure;plot(lfcrp_comp - lfcrp);
-figure;plot(inc_comp - inc_save);%%这两个有区别，所以后面的就有区别
 
-figure;plot(dt0-out2);
 
 %% 超高相关函数
 function out = filter_1_unknow(x_k,tbs)
+%% 差分后经过Bz
 persistent x y;
 if isempty(x)
     x = zeros(2,1);
     y = zeros(2,1);
 end
 sd74 = 82281.94545;
-sd74 = 126376.6875;     %%这才是正解
+sd74 = 126376.6875;     %%这才是正解，这是啥意思？
+% 100000.0 * ( 75.194127 / DDISP );     DDISP位移计之间的距离
 x(2) = x_k;
 x_dot = x(2) - x(1);
 %%
-y(2) = ( x_dot*sd74 + 2^17 * y(1) )/(2^17 + tbs);
+y(2) = ( x_k + 2^17 * y(1) )/(2^17 + tbs);
 
 %% update
 x(1) = x(2);
@@ -180,7 +185,7 @@ end
 
 
 function out = F_xiuzheng(x,tbs)
-% 这个F滤波器少了点什么？就是笑了x*tbs^2，这一个项
+% 这个F滤波器少了点什么？就是少了x*tbs^2，这一个项
 %% 滤波器设定
 %% 对于x[3]，其与同理
 % x(3)=x_n

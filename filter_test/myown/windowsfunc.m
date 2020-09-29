@@ -11,18 +11,19 @@
 %   作者：s.m.
 %--------------------------------------------------------------------------
 %  功能： 1.窗函数的画图，参考文档「高速线路轨道长波不平顺检测技术研究.docx」
-%        2.
+%        2.这个很重要
 %        3. 
 %--------------------------------------------------------------------------
 
 close all;
 clear all;
 %% 矩形窗
+%% 
 M = 30;
 N = 2*M+1;
 psi = linspace(0,pi,10000);
 Omega = 2.*pi./psi.*0.25;
-Wn = 1- sin(N.*psi/2)./sin(psi./2)./N;
+Wn = sin(N.*psi/2)./sin(psi./2)./N;
 figure;semilogx(Omega,20*log10(abs(Wn)));
 grid on;
 %% 三角窗
@@ -31,8 +32,13 @@ N = 2*M+1;
 psi = linspace(0,pi,10000);
 Omega = 2.*pi./psi.*0.25;
 Wn = (sin(M*psi/2)./sin(psi/2)).^2/M^2;
-figure;semilogx(Omega,20*log10(abs(Wn)));
-grid on;
+% figure;semilogx(Omega,20*log10(abs(Wn)));
+% grid on;
+%% 
+b = ones(1,N)/N;
+[h,f] = freqz([b],[zeros(1,N-1),1],10000,4);
+figure;semilogx(1./f,20*log10(h));grid on;
+
 
 
 

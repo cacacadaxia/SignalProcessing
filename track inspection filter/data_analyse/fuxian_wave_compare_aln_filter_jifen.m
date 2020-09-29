@@ -236,10 +236,19 @@ for i = 1:length(yL)
 end
 figure;plot(longwave70m);hold on;plot([zeros(143,1);yL]);legend gj matlab
 
+
+%% 这里长波的问题就是值太大，而且也不是很对齐啊，难道滤波器的实现还是有问题？
+yL_2 = longwave_filter(amcol,281,71,281,491);
+for i = 1:length(yL_2)
+    yL_2(i) = point3filter(yL_2(i));
+end
+figure;plot(longwave70m);hold on;plot([zeros(1,1);yL]);legend gj matlab
+
+
 %% 观察频谱(这种方法有点问题)
-plot_mag(longwave25m/103,'gj中给出的轨向 25m');
-plot_mag(longwave70m/103,'gj中给出的轨向 70m','hold');
-plot_mag(yL/103,'matlab中给出的轨向 70m','hold');legend gj25m gj70m 70m/matlab;
+% plot_mag(longwave25m/103,'gj中给出的轨向 25m');
+% plot_mag(longwave70m/103,'gj中给出的轨向 70m','hold');
+% plot_mag(yL/103,'matlab中给出的轨向 70m','hold');legend gj25m gj70m 70m/matlab;
 
 
 
@@ -261,8 +270,6 @@ y(1) = y(2);
 y(2) = y(3);
 out = y(3);
 end
-
-
 function out = R(x_k,tbs)
 wd = 0.001;
 
@@ -281,7 +288,6 @@ y(1) = y(2);
 out = y(2);
 
 end
-
 function out = G(x_k,tbs_k)
 persistent x y1 tbs;
 if isempty(x)
@@ -309,7 +315,6 @@ tbs(1) = tbs(2);
 out = y;
 
 end
-
 function plot_mag(signal_data , tit , varargin)
 
 if (nargin == 3)
@@ -334,7 +339,6 @@ set(gca,'Fontname','Times New Roman','fontsize',16);
 title(tit);
 grid on;
 end
-
 %% 参考别的方法
 function plot_mag1(signal_data , tit , varargin)
 %% 波长实际上就是周期
@@ -360,8 +364,6 @@ set(gca,'Fontname','Times New Roman','fontsize',16);
 title(tit);
 grid on;
 end
-
-
 %% 在长波滤波之后进行积分？
 function out = integrational(auat)
 
@@ -384,7 +386,6 @@ auatp = auat;
 euasp = euas;
 
 end
-
 function out = find_index(in)
 %% 用在滤波器的队列中
 Num = 2048;
@@ -394,7 +395,6 @@ else
     out = mod(in,Num);
 end
 end
-
 function out = point3filter(in)
 %% 简单的三点滤波
 persistent x;

@@ -1,19 +1,24 @@
 
 
 
-function yL = longwave_filter(amcol)
+function yL = longwave_filter(amcol,varargin)
+if nargin == 5
+    NTri_1 = varargin{1};
+    NTri_2 = varargin{2};
+    NRec_1 = varargin{3};
+    NRec_2 = varargin{4};
+    %%
+    mainTriM = (NTri_1-1)/2;
+    auxTriM = (NTri_2-1)/2;
+    mainRecM = (NRec_1-1)/2;
+    auxRecM = (NRec_2-1)/2;
+else
+    mainTriM = 160;
+    auxTriM = 40;
+    mainRecM = 160;
+    auxRecM = 280;
+end
 
-%% 参数设定 之前的70m长波计算方法
-mainTriM = 160;
-auxTriM = 40;
-mainRecM = 160;
-auxRecM = 280;
-
-%% 参数设定 
-mainTriM = 160;
-auxTriM = 40;
-mainRecM = 160;
-auxRecM = 280;
 
 
 %% 虽然滤波器的实现是没什么问题，但是时延需要调整

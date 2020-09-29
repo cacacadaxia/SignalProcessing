@@ -19,6 +19,7 @@
 close all;
 clear all;
 filepath = 'data/0916_1337_x/';
+start_pos = 1; N = 1e4;
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);
@@ -27,7 +28,7 @@ x = x/1000;%%km表示
 %%
 tmp2 = textread([filepath , 'tmp_zhongjian_1337.txt']);
 if length(tmp2)>N
-    tmp2 = tmp2(1:N,:);
+    tmp2 = tmp2(start_pos : start_pos+N-1 , :);
 end
 % gpxbr,hfcra,lfcrp
 
@@ -38,15 +39,11 @@ delay = 418;%%一直是这个数吗？
 %%这两个参数是啥意思？这两个量是准确的
 G_par = 3.8259e-14*141500.0;
 ht = 3.90398e-05*141500.0*0.268;
-
 tbs = fmctrl_data(:,end);
 tbs_s = tbs/1e5;
 % ***************step1 模型搭建*************************
 rou_l = fmctrl_data(:,9);
 rou_r = fmctrl_data(:,11);
-
-% rou_l = rou_l/(129.01);
-% rou_r = rou_r/(129.01);
 
 for i = 3:length(rou_l)
     rou_l(i) = rou_l(i)*2;
@@ -62,15 +59,8 @@ for i = 1:length(ay)
     ay_Gz(i,1) = G(ay(i) , tbs(i));
     %% 与文档中写的不一样，是为什么？不需要Fs与Gs滤波吗？还是在其他地方已经做过处理了？
     %% 需要问一下
-    %% 当然，这里有一个猜想就是：Gz顺便干*T^2的活？
-    %% 应该是吧，这样不是人为增加难度吗？
+    %% 当然，这里有一个猜想就是：Gz顺便干*T^2的活?
 end
-
-%% 频谱观察
-% plot_mag(ay,'滤波前')
-% plot_mag(ay_Fz,'滤波后')
-% 
-% figure;plot(aln(:,2)-ay_Gz);
 
 %% 积分
 % sita_b = sita_b/3276.8/180*pi;
@@ -80,12 +70,13 @@ for i = 3:length(sita_b)
 end
 
 camo = ay_Gz - G_par .* sita_b .* tbs.^2 + ht * sita_b_dot2;
+
 %% 在这里进行修改
 gyroYaw = fmctrl_data(:,6);
 for i = 1:length(gyroYaw)
     gyroYaw_ = gyroYaw(i);
     tbs_ = tbs(i);
-    yaw_Rz(i,1) = C(gyroYaw_,tbs_);
+    yaw_Rz(i,1) = C(gyroYaw_,tbs_);%%为什么需要这个？
 end
 sampleDistance = 0.25;
 yawParameter = 2.0970;      %% 135751/9.8*6.0135*6.0135/4294.97*pi/180
@@ -108,7 +99,7 @@ camo = -camo;
 amcol = camo + rou_l_dot2;
 amcor = camo - rou_r_dot2;
 %%
-% figure;plot(amcol,'LineWidth',1);hold on;plot(aln(:,3));title('amcol之间的对比');legend matlab gj
+figure;plot(amcol);hold on;plot(aln(:,3));
 figure;plot(amcol-aln(:,3));title('amcol之间的对比');
 
  %%

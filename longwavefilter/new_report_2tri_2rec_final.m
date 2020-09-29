@@ -1,6 +1,7 @@
 % -----------------------
 % 
 %   1. 对修改的系数进行检验
+% 包含了各种不同的波形
 % 
 % ------------------------
 
@@ -21,33 +22,41 @@ para = winLen_para_set();
 
 % plot 25
 fig = figure;
-% semilogx((lamda), ((Acc_TriRec_25)), 'b','LineWidth',2);
-% plot_line_func(Acc_TriRec_25,lamda,25);
-% xlabel('Wavelength /m')
-% ylabel('Magnitude /dB')
-% set(gca,'Fontname','Times New Roman','fontsize',14);
-% % plot 42
-% % figure;
-% semilogx((lamda), ((Acc_TriRec_42)), 'b','LineWidth',2);
-% plot_line_func(Acc_TriRec_42,lamda,42);
-% xlabel('Wavelength /m')
-% ylabel('Magnitude /dB')
-% set(gca,'Fontname','Times New Roman','fontsize',14);
+semilogx((lamda), ((Acc_TriRec_25)), 'b','LineWidth',2);
+plot_line_func(Acc_TriRec_25,lamda,25);
+xlabel('Wavelength /m')
+ylabel('Magnitude /dB')
+set(gca,'Fontname','Times New Roman','fontsize',14);
+% plot 42
+figure;
+semilogx((lamda), ((Acc_TriRec_42)), 'b','LineWidth',2);
+plot_line_func(Acc_TriRec_42,lamda,42);
+xlabel('Wavelength /m')
+ylabel('Magnitude /dB')
+set(gca,'Fontname','Times New Roman','fontsize',14);
 % plot 70
-% figure;
+figure;
 semilogx((lamda), ((Acc_TriRec_70)), 'b','LineWidth',2);
 plot_line_func(Acc_TriRec_70,lamda,70);
 xlabel('Wavelength /m')
 ylabel('Magnitude /dB')
 set(gca,'Fontname','Times New Roman','fontsize',14);
-% % plot 120
-% % figure;
-% semilogx((lamda), ((Acc_TriRec_120)), 'b','LineWidth',2);
-% plot_line_func(Acc_TriRec_120,lamda,120);
-% xlabel('Wavelength /m')
-% ylabel('Magnitude /dB')
-% set(gca,'Fontname','Times New Roman','fontsize',14);
+% plot 120
+figure;
+semilogx((lamda), ((Acc_TriRec_120)), 'b','LineWidth',2);
+plot_line_func(Acc_TriRec_120,lamda,120);
+xlabel('Wavelength /m')
+ylabel('Magnitude /dB')
+set(gca,'Fontname','Times New Roman','fontsize',14);
 
+
+fprintf('半窗长结果：\n')
+fprintf('\tM_Tri1\tM_Tri2\tM_Rec1\tM_Rec2\n');
+fprintf("-------------------------------------------\n")
+list = {'25m','42m','70m','120m'};
+for i = 1:4
+    fprintf("%s\t%d\t%d\t%d\t%d\t\n",list{i},para(i,:));
+end
 function [ensco1, tridb, maxV, minV, BW, slope] = tri_rec_paral_repair(lam, para)
 %三角窗+矩形窗并联幅频特性分析
 N=128^2;

@@ -189,7 +189,7 @@ end
 
 
 % 
-figure;plot(tmp(:,3) - ceil(hfcra).');
+figure;plot(tmp(:,3) - ceil(hfcra).');%%Îó²îºÜÐ¡
 figure;plot(tmp(:,3),'LineWidth',1);hold on;plot(hfcra)
 figure;plot(tp1'-tmp1);axis([1,10000,-10,10]);
 figure;plot(tp2'-tmp2);

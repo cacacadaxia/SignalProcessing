@@ -86,8 +86,9 @@ gpyawRevise = gpyawReviseTemp1 + 0;
 
 gpyawRevise = zeros(size(gpyawRevise));
 
-camo = - gpyawRevise + ht * sita_b_dot2;
+% camo = - gpyawRevise + ht * sita_b_dot2;
 camo = -camo;
+camo = quzheng(camo);
 % camo = zeros(size(camo));%%极端情况，全部变成0
 % figure;plot(camo );hold on;plot(aln(:,1));legend matlab gj
 
@@ -99,7 +100,7 @@ camo = -camo;
 amcol = camo + rou_l_dot2;
 amcor = camo - rou_r_dot2;
 %%
-figure;plot(amcol);hold on;plot(aln(:,3));
+% figure;plot(amcol);hold on;plot(aln(:,3));
 figure;plot(amcol-aln(:,3));title('amcol之间的对比');
 
  %%
@@ -112,10 +113,11 @@ sbsc = 101.000;
 %% 数组不知道有啥用就是了
 %% 这里的积分有什么道理呢？
 %% 有改进的空间
+%% 这些定好的参数有什么意义？
 Num = 768;
 amcol_array = zeros(Num,1);
 amcol_arraytmp = zeros(Num,1);
-in1 = 533; in2 = 432;in4=382;in6=331;in7=230;%%这些参数都是固定的，不能变
+in1 = 533; in2 = 432; in4=382; in6=331; in7=230;%%这些参数都是固定的，不能变
 in = 539;%%控制偏移值
 
 %% 正常的25m的滤波
@@ -124,7 +126,6 @@ for i = 1:length(amcol)           %%简单积分，肯定是不对的
    amcol_array(in) = amcol(i);
     %%由此可见就是输入出了问题，所以查找输入
     %%-----------------------------
-    
     alu = alu + amcol_array(in1) - 3*amcol_array(in2) + 3*amcol_array(in6) - amcol_array(in7);
     elupp = alu;
     elup = elup + elupp;
@@ -157,7 +158,7 @@ end
 
 %%
 figure;plot(yL,'k','LineWidth',0.5);hold on;plot(aln(:,4),'r','LineWidth',0.5);legend matlab gj
-figure;plot((yL - aln(:,4))/103);%%基本完全一致
+figure;plot((yL - aln(:,4)));%%基本完全一致
 title('左轨向的结果(单位：mm)');
 %%
 
@@ -266,6 +267,16 @@ ylabel('Mag dB')
 set(gca,'Fontname','Times New Roman','fontsize',16);
 title(tit);
 
+end
+function out = quzheng(in)
+out = zeros(2,1);
+for i = 1:length(in)
+    if in(i)>=0
+        out(i) = floor(in(i));
+    elseif in(i)<0
+        out(i) = floor(in(i)) + 1;
+    end
+end
 end
 
 %% 在长波滤波之后进行积分？

@@ -7,26 +7,26 @@ if nargin == 5
     NTri_2 = varargin{2};
     NRec_1 = varargin{3};
     NRec_2 = varargin{4};
-    %%
+    
+    %% 输入的是N的值
     mainTriM = (NTri_1-1)/2;
     auxTriM = (NTri_2-1)/2;
     mainRecM = (NRec_1-1)/2;
     auxRecM = (NRec_2-1)/2;
 else
+    %% 默认的
     mainTriM = 160;
     auxTriM = 40;
     mainRecM = 160;
     auxRecM = 280;
 end
 
-
-
 %% 虽然滤波器的实现是没什么问题，但是时延需要调整
 % FSCAL = 0.1
 % -1.036, 0.036, -0.25, 0.25, FSCAL * 2.0
 % 参数设定
 FSCAL = 0.1;
-longWaveFilterBufferSize = 2048;
+% longWaveFilterBufferSize = 2048;
 mainTriWinCoef = -1.036;
 auxTriWinCoef = 0.036;
 mainRecWinCoef = -0.25;
@@ -36,7 +36,7 @@ scaleCoef =  FSCAL * 2.0;
 %%
 mainTriFront = 0; auxTriFront = 0; mainTriBehind = 0; auxTriBehind = 0;%%三角窗
 mainRecSum = 0; auxRecSum = 0; mainTriSum = 0; auxTriSum = 0;
-MianREC = 0; AuxREC = 0; MainTRI = 0; AuxTRI = 0;
+% MianREC = 0; AuxREC = 0; MainTRI = 0; AuxTRI = 0;
 Num = 2048;     %%循环队列存储数据
 data = zeros(Num,1);
 center_pos = 1000;
@@ -69,7 +69,8 @@ for i = 1:length(amcol)
     center_pos = center_pos + 1;
     center_pos = find_index(center_pos);
 end
-yL = yL/5;%%除以固定的系数，然后得到轨向的值
+
+yL = yL * scaleCoef;
 for i = 1:length(yL)
     yL(i) = point3filter(yL(i));
 end

@@ -113,13 +113,14 @@ for i = 2:length(result)
     % 这是一个很复杂的量，逻辑就是将所有的量都转换成为feet就好了
     dtemp = fim  * yaw(i) * compf / tbs;%% wz -->(fim -- 0.25变成 feet )
     dtemp = dtemp - dgyro * yaw_dot / tbs;%% L*s*F(s)-->(yaw_dot / tbs代表微分diff)
-%     dtemp = dtemp +  mfd12 * yaw_dot2 / fim / tbs;%%不要也罢
+    dtemp = dtemp +  mfd12 * yaw_dot2 / fim / tbs;%%不要也罢
     dtemp = dtemp + hight  * wt_dot / tbs;%% ht*s*F(s) %% wt_dot / tbs-->(wt_dot / tbs 代表微分diff)
     dtemp = scali * ( dtemp + dincl * w_bt_dot / tbs);%% -->( w_bt_dot / tbs 代表微分diff)
-    
+    %% scali包含了g
+    %% scali最终单位变成什么了？
     %%
     dtmp_Fz = F(dtemp,tbs);    %%这个好像有问题？
-    
+    out(i,1) = dtmp_Fz;
     %% next step
     
     infp = B(gpin(i),tbs);
@@ -131,19 +132,11 @@ for i = 2:length(result)
     yaw_dotp = yaw_dot;
 end
 
-%%
-% %% 新的超高
-% for i = 2:length(result)
-% 
-%     tbs = tmp(i,3)/1e5;
-%     
-% end
-
 
 
 %% 结果对比
 
-% figure;plot(out);hold on;plot(result);legend matlab gj;
+figure;plot(out - result);
 figure;plot(lfcrp_comp - lfcrp);
 
 

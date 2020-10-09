@@ -71,18 +71,24 @@ pmcor = prmct + gpvro_dot2;
 
 %% 长波滤波并积分
 zL = longwave_filter(pmcol,281,71,281,491);
+zR = longwave_filter(pmcor,281,71,281,491);
 
 %% 结果对比
 pmcol_ref = tmp3(:,1);
 pmcol_ref70m = tmp3(:,2);
-% figure;plot(pmcol_ref,'k','LineWidth',0.5);hold on;plot(pmcol,'r--','LineWidth',0.5)
-% figure;plot(pmcol_ref - pmcol);
-%% 结果对比2 加上对齐
-ratio = 1.2;figure;plot(ratio.*zL);hold on;plot(pmcol_ref70m(177:end));legend matlab gj
+figure;plot(pmcol_ref,'k','LineWidth',0.5);hold on;plot(pmcol,'r--','LineWidth',0.5)
+figure;plot(pmcol_ref - pmcol);
+
+%% 为什么会有一个系数呢？感觉很奇怪
+ratio = 1;figure;plot(ratio.*zL);hold on;plot(pmcol_ref70m(177:end));legend matlab gj
+
+
 
 %%
 plot_mag(pmcol_ref,'25m')
 plot_mag(pmcol_ref70m,'70m','hold')
+legend 1 2
+
 
 
 %% 函数

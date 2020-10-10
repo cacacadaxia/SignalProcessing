@@ -76,21 +76,20 @@ gyroYaw = fmctrl_data(:,6);
 for i = 1:length(gyroYaw)
     gyroYaw_ = gyroYaw(i);
     tbs_ = tbs(i);
-    yaw_Rz(i,1) = C(gyroYaw_,tbs_);%%为什么需要这个？
+    yaw_Rz(i,1) = C(gyroYaw_ , tbs_);%%为什么需要这个？
 end
 sampleDistance = 0.25;
 yawParameter = 2.0970;      %% 135751/9.8*6.0135*6.0135/4294.97*pi/180
 %% yawParameter这个参数是怎么得到的？
 gpyawReviseTemp1 = yaw_Rz*yawParameter*sampleDistance*( -1 );
 gpyawRevise = gpyawReviseTemp1 + 0;
-
 gpyawRevise = zeros(size(gpyawRevise));
 
 % camo = - gpyawRevise + ht * sita_b_dot2;
 camo = -camo;
 camo = quzheng(camo);
 % camo = zeros(size(camo));%%极端情况，全部变成0
-% figure;plot(camo );hold on;plot(aln(:,1));legend matlab gj
+% figure;plot( camo );hold on;plot(aln(:,1));legend matlab gj
 
 %% 只是进行这样简单的移植之后，发现其结果还是存在问题的，所以暂时先放一边
 %%

@@ -103,8 +103,7 @@ sd74 =  ( 75.194127 / DDISP );%%sd74 1e5或者1都不影响
 %% 这里的参数就是因为很多代码冗余，所以改起来很费劲
 hight = 1.8 * 0.3048;         %%feet   
 scali = 1230.264648 / 1e5;
-scali = 1e5/246083.654/0.54426*1638.4;%%这个值改变还是有影响的
-scali = 1e5/246083.654/(1.7453e-02*9.8/0.3048)*1638.4;%%这个值改变还是有影响的
+scali = 1/246083.654/0.54426*1638.4;%%这个值改变还是有影响的
 dincl = 1.32 * 0.3048;       %%倾角计到转向架的距离
 % mfd12 = -(dgyro*2)*(dgyro*2)/12;%%why？不是很懂，这个值与英寸有关系的  --> feet(变成feet)
 yaw_dotp = 0;
@@ -129,8 +128,8 @@ for i = 2:length(result)
 %     dtemp = dtemp +  mfd12 * yaw_dot2 / fim / (tbs/1e5);%%不要也罢，二阶的量
     dtemp = dtemp + hight  * wt_dot / (tbs/1e5);%% ht*s*F(s) %% wt_dot / tbs-->(wt_dot / tbs 代表微分diff)
 %     dtemp = scali * ( dtemp + dincl * w_bt_dot /  (tbs/1e5) );%% -->( w_bt_dot / tbs 代表微分diff)
-    dtemp = (dtemp + dincl * w_bt_dot /  (tbs/1e5))/246083.654 /(0.016932*9.8) * 3276.8 * 1.0057; %%1.0057是前后两个scali的参数比值
-%     dtemp = ( dtemp + dincl * w_bt_dot /  (tbs/1e5) ) / 246083.654  * s1 * 1.0057; %%1.0057是前后两个scali的参数比值
+%     dtemp = (dtemp + dincl * w_bt_dot /  (tbs/1e5)) / 246083.654 /( 0.016932 * 9.8 ) * 3276.8 * 1.0057; %%1.0057是前后两个scali的参数比值
+    dtemp = ( dtemp + dincl * w_bt_dot /  (tbs/1e5) ) / 246083.654 / 9.8 * 3276.8; %%1.0057是前后两个scali的参数比值
     % 应该是tbs/1e5=T，计算微分需要注意这个量，在scali中包含
     %% 为什么除以的是(0.016932*9.8)这个g呢？
     %% scali包含了g
@@ -143,12 +142,14 @@ for i = 2:length(result)
     %% next step
 %     1/(0.016932*9.8) * 3276.8 = 19748
     
-    infp = B2( gpin(i)  , tbs);   %%这个B多次使用所以产生影响
+    infp = B2( gpin(i) / 19748 * 3276.8, tbs);   %%这个B多次使用所以产生影响  %%3276.8作为量纲
+    infp = infp / 9.8;%%都是弧度
     infp_save(i,1) = infp;
     inc = infp + dtmp_Fz;     
-    inc = inc / 2;                    %%为什么除以2？这一点让人很困惑，单位的问题。
-    lfcrp(i,1) = H3z(inc , tbs);
+    lfcrp(i,1) = H3z( inc , tbs );
     
+    
+    lfcrp(i,1) = lfcrp(i,1) / 3276.8 * 1638.4 *180/pi;
     %% update
     yaw_dotp = yaw_dot;
     
@@ -156,6 +157,8 @@ end
 % lfcrp = lfcrp/1638.4/180*pi;
 % lfcrp;%%度数
 
+figure;plot(lfcrp / 3276.8 /pi*180);
+%%直接变成度也十分不合理，为啥？
 
 %%
 % gpxlp0 = (int)(gpxbr+(long)dt74*scalr)/2;
@@ -174,14 +177,14 @@ end
 figure;plot(roll_save/pi*180);
 sita_c = lfcrp_comp / 1638.4;%%这个系数很重要，相当于统一的单位
 hold on;plot(sita_c);
-legend matlab 
+legend matlab
 %% 那么这个就有问题了，这是为什么呢？
 %% 这个对比结果不准确，因为还没有加上高频的成分，当然加上之后效果也未必好
 
 %% 结果对比
 % figure;plot(result - out);figure;plot(result);hold on;plot(out);
-figure;plot(lfcrp );hold on;plot(lfcrp_comp);legend matlab gj;
-figure;plot(lfcrp_comp - lfcrp);
+figure;plot( lfcrp );hold on;plot(lfcrp_comp);legend matlab gj;
+figure;plot( lfcrp_comp - lfcrp );
 
 
 %%

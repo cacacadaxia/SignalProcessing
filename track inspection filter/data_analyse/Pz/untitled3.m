@@ -42,8 +42,9 @@ lfcrp_ref = tmp4(:,3);
 
 %% 应该除以一个系数，这里为什么没有？
 s1 = 246083.654;
-GYRO = GYRO / 1.31;
+GYRO = GYRO / 1.31 / 3276.8 * 1638.4;
 hfcra_func = Pz3_gj( GYRO , TBS );
+
 figure;plot( hfcra_ref -  hfcra_func );figure;plot( hfcra_ref );hold on;plot( hfcra_func);%%不准
 
 
@@ -63,6 +64,9 @@ end
 sita_c = gpxbr/1638.4;
 figure;plot(roll_save/pi*180);hold on;plot(sita_c);legend matlab积分 gj;
 %%这里可以看到漂移比较严重，但是基本可以确定其变化的范围
+
+
+
 
 %%
 function out = B(x_k,tbs)

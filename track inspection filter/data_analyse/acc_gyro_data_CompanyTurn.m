@@ -32,12 +32,12 @@ if length(tmp2)>N
 end
 % gpxbr,hfcra,lfcrp
 %% ¹ß×éµ¥Î»»»Ëã
-gyroll = tmp3(:,1)/246083.654;
-gypitch = tmp3(:,2)/246083.654;
-gyyaw = tmp3(:,6)/246083.654;
-accx = tmp3(:,3)/19748;
-accy = tmp3(:,4)/13852;
-accz = tmp3(:,7)/13852;
+gyroll = tmp3(:,1)/246083.654;  %%rad/s
+gypitch = tmp3(:,2)/246083.654; %%rad/s
+gyyaw = tmp3(:,6)/246083.654;   %%rad/s
+accx = tmp3(:,3)/19748;%%m/s^2
+accy = tmp3(:,4)/13852;%%m/s^2
+accz = tmp3(:,7)/13852;%%m/s^2
 % accx = accx/3276.8;
 % accy = accy/3276.8;
 % accz = accz/3276.8;

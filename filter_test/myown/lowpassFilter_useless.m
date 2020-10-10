@@ -16,8 +16,6 @@ semilogx(tmp/pi/2 , 20*log10(H),'LineWidth',2);
 grid on;
 
 
-
-
 %%
 % ----- ¶þ½×¿¹»ìµþ + ²¹³¥ -------------
 clear all;

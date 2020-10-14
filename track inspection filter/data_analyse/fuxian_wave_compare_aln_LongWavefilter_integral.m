@@ -15,13 +15,14 @@
 %        3. 修改积分的方法
 %       4. 用fdatool设计长波滤波器，观察效果
 % fuxian_wave_compare_aln_longwave为模版，然后更换其积分的部分
-%       5. 观察频谱
+%       5. 观察频谱，应该算是正确的方法
 % 
 %--------------------------------------------------------------------------
 
 close all;
 clear all;
-filepath = 'data/0916_1337_x/';start_pos = 1;
+filepath = 'data/0916_1337_x/';
+start_pos = 1;
 N = 9996;
 load_txt;
 size(wave_out);
@@ -246,9 +247,9 @@ figure;plot(longwave70m);hold on;plot([zeros(1,1);yL]);legend gj matlab
 
 
 %% 观察频谱(这种方法有点问题)
-% plot_mag(longwave25m/103,'gj中给出的轨向 25m');
-% plot_mag(longwave70m/103,'gj中给出的轨向 70m','hold');
-% plot_mag(yL/103,'matlab中给出的轨向 70m','hold');legend gj25m gj70m 70m/matlab;
+plot_mag(longwave25m/103,'gj中给出的轨向 25m');
+plot_mag(longwave70m/103,'gj中给出的轨向 70m','hold');
+plot_mag(yL/103,'matlab中给出的轨向 70m','hold');legend gj25m gj70m 70m/matlab;
 
 
 
@@ -270,6 +271,7 @@ y(1) = y(2);
 y(2) = y(3);
 out = y(3);
 end
+
 function out = R(x_k,tbs)
 wd = 0.001;
 

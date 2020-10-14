@@ -103,7 +103,6 @@ title(tit);
 grid on;
 end
 
-
 function plot_mag2(signal_data , tit , varargin)
 if (nargin == 3)
     mode = varargin{1};
@@ -116,7 +115,7 @@ end
 fs = 4;     %% 0.25m为一个采样间隔
 N = length(signal_data);
 x = (1:N/2+1)/N*fs;
-% x = 1./x;
+x = 1./x;
 tp = abs(fftshift(fft(signal_data)));
 tp = 20*log10(tp);
 semilogx( x , tp((length(tp)/2):end)   );

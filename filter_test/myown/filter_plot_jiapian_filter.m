@@ -60,14 +60,13 @@ Ls = 0.25;
 Rz = (1-wd)*(1- exp(-j*2*pi*psi*0.25))./( 1-(1-wd)*exp(-j*2*pi*psi*0.25) );
 hold on;semilogx(lamda,20*log10(Rz),'LineWidth',1);
 
-%% 模仿freqs画图
+%% 模仿freqs画图，不是，另一种表示方法
 %%这是啥意思？没看明白，在哪里找到这个公式的
 tmp = 2*(1-wd)^2*(1-cos(2*pi.*psi*0.25))./( 1+ (1-wd)^2 -2*(1-wd)*cos(2*pi.*psi*0.25) );
 Rz2 = 10*log10(tmp);
 %%bode
 figure;semilogx(1./psi , 20*log10(Rz),'r--','LineWidth',1);
 hold on;semilogx(1./psi , Rz2,'LineWidth',1);
-
 
 %% 模拟了一个freqz的过程
 psi = 0:0.001:900;

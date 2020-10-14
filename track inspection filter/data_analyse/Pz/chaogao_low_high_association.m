@@ -15,48 +15,52 @@
 % 注意：
 %       1.1.31与1.31两个值一致，这一点需要注意，一个是陀螺仪的单位，另一个是omega1的倒数
 %       2.int(gj programme) = 量纲*float(true)
-%       3.
+%       3.feet与inch的关系需要注意，但是这里的表示方法虽然存在问题，但是并未影响到最后的结果
+%       4. 为什么gpro与w-bt的单位是一致的？
 %--------------------------------------------------------------------------
+
 %%
 clear all;
 close all;
+
 %%
+start_pos = 1;
 N = 10000;
 tmp2 = textread('Ps3_filter_wx.txt');
 if length(tmp2)>N
-    tmp2 = tmp2(1:N,:);
+    tmp2 = tmp2(start_pos:start_pos+N-1,:);
 end
 gpro = tmp2(:,1);
 %% 读取yaw rate
 tmp3 = textread('fmctrl_data_1337.txt');
 if length(tmp3)>N
-    tmp3 = tmp3(1:N,:);
+    tmp3 = tmp3(start_pos:start_pos+N-1,:);
 end
 yaw = tmp3(:,6);
 gpin = tmp3(:,4);
 %%
 tmp4 = textread('Hz_filter_inc.txt');
 if length(tmp4)>N
-    tmp4 = tmp4(1:N,:);
+    tmp4 = tmp4(start_pos:start_pos+N-1,:);
 end
 inc_comp = tmp4(:,1);
 lfcrp_comp = tmp4(:,3);
 %%
 tmp5 = textread('Bz_filter.txt');
 if length(tmp5)>N
-    tmp5 = tmp5(1:N,:);
+    tmp5 = tmp5(start_pos:start_pos+N-1,:);
 end
 gpin_2 = tmp5(:,1);
 infp_2 = tmp5(:,2);
 %% 读取数据
 tmp = textread('fz_filter_gaodi.txt');
 if length(tmp)>N
-    tmp = tmp(1:N,:);
+    tmp = tmp(start_pos:start_pos+N-1,:);
 end
 gpvlo = tmp(:,1);%%32768/5 inch
 gpvro = tmp(:,2);
 dt74 = gpvro/2-gpvlo/2;%%为什么是除以2 %%%%32768/10 inch
-fd74 = -dt74;       %%不清楚
+fd74 = -dt74;       %%
 result = tmp(:,4);
 %%
 
@@ -91,10 +95,10 @@ for i = 2:length(result)
     %%其中dot代表差分，diff代表微分
     tbs = tmp(i,3);
     fd74_dot = (fd74(i) - fd74(i-1))*sd74;  %%--> 量纲 246083.654
-    fd74_diff = fd74_dot / ( tbs / 1e5 ); %%tbs/1e5代表T
-    w_bt(i,1) = B1(fd74_diff,tbs);
+    fd74_diff = fd74_dot / ( tbs / 1e5 );   %%tbs/1e5代表T
+    w_bt(i,1) = B1(fd74_diff,tbs);          %%输入滤波器的是微分量
     w_bt_dot = w_bt(i,1) - w_bt(i-1,1);
-    wt(i,1) = gpro(i) - w_bt(i);        %%他们两个单位统一吗？应该是
+    wt(i,1) = gpro(i) - w_bt(i);            %%他们两个单位统一吗？应该是，理论上并不是，那么怎么考虑？
     wt_dot = wt(i,1) - wt(i-1,1);
     
     yaw_dot = yaw(i) - yaw(i-1);

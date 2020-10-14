@@ -70,24 +70,38 @@ for i = 1:length(ay)
 end
 %% 求amcol与amcor
 sita_b = tmp2(:,1);
-sita_b_dot2(2,1) = sita_b(2)-sita_b(1) - sita_b(1);
+sita_b_dot2(2,1) = sita_b(2) - sita_b(1) - sita_b(1);
 sita_b_dot2(1,1) = sita_b(1);
-for i = 3:length(sita_b)
+for i = 3:length( sita_b )
     sita_b_dot2(i,1) = sita_b(i) - 2*sita_b(i-1) + sita_b(i-2);
 end
 
-camo = -( ay_Gz - G_par .* sita_b .* TBS.^2 + ht * sita_b_dot2 );
-camo = quzheng(camo);%%这里说明了取整带来了问题
+camo = - ( ay_Gz - G_par .* sita_b .* TBS.^2 + ht * sita_b_dot2 );
+camo = quzheng( camo );%%这里说明了取整带来了问题
 amcol = camo + rou_l_dot2;
 amcor = camo - rou_r_dot2;
 
-%% 用陀螺仪代替
-
-
 %% 对比
 amcol_ref = aln(:,3);
-figure;plot(amcol - amcol_ref);
+figure;plot( amcol - amcol_ref );
+yL = shortwave_filter( amcol ); %%25m以下短波
+figure;plot( yL,'LineWidth',1);hold on;plot(aln(:,4));legend 1 2
+figure;plot( yL - aln(:,4) );
 
+
+%% 对比结果
+yL_2 = longwave_filter(amcol,281,71,281,491);%%都是N的值
+
+%%
+plot_mag(yL,'25m');
+plot_mag(yL_2,'单边幅值谱,截止波长30m和70m对比','hold');
+legend 30m 70m;
+
+
+
+%% 短波滤波器
+function out = shortwave_filter(in)
+amcol = in;
 %% 25m长波滤波加积分
 alu = 0;elupp = 0;elup = 0;elu = 0;als = 0;alss = 0;alsss = 0;
 sscal = 0.000825;
@@ -101,10 +115,8 @@ amcol_arraytmp = zeros(Num,1);
 in1 = 533; in2 = 432;in4=382;in6=331;in7=230;
 in = 539;
 
-for i = 1:length(amcol)           %%简单积分，肯定是不对的
-    %%
-%     amcol = aln(:,3);
-   amcol_array(in) = amcol(i);
+for i = 1:length(amcol) 
+    amcol_array(in) = amcol(i);
     alu = alu + amcol_array(in1) - 3*amcol_array(in2) + 3*amcol_array(in6) - amcol_array(in7);
     elupp = alu;
     elup = elup + elupp;
@@ -129,16 +141,11 @@ for i = 1:length(amcol)           %%简单积分，肯定是不对的
     save(i,2) = elu;
     save(i,3) = als;
     save(i,4) = alsss;
-     
 end
-
-% figure;plot(yL,'LineWidth',1);hold on;plot(aln(:,4));legend 1 2
-% figure;plot((yL - aln(:,4)));%%基本完全一致，左轨向可以暂时先不用考虑了
-
-%% 对比结果
-yL_2 = longwave_filter(amcol,281,71,281,491);%%都是N的值
-
 %%
+out = yL;
+end
+%% 前端滤波器
 function out = C(x_k,tbs)
 omega1 = 0.76;
 
@@ -173,6 +180,7 @@ y(1) = y(2);
 y(2) = y(3);
 out = y(3);
 end
+
 function out = R(x_k,tbs)
 wd = 0.001;
 
@@ -218,8 +226,16 @@ tbs(1) = tbs(2);
 out = y;
 
 end
-function plot_mag(signal_data , tit)
-figure;
+
+function plot_mag(signal_data , tit , varargin)
+if (nargin == 3)
+    mode = varargin{1};
+    if mode == 'hold'
+        hold on;
+    end
+else
+    figure;
+end
 fs = 4;     %% 0.25m为一个采样间隔
 N = length(signal_data);
 x = (1:N/2+1)/N*fs;
@@ -231,7 +247,7 @@ xlabel('\lambda m')
 ylabel('Mag dB')
 set(gca,'Fontname','Times New Roman','fontsize',16);
 title(tit);
-
+grid on;
 end
 function out = quzheng(in)
 out = zeros(2,1);

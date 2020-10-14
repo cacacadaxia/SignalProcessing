@@ -73,21 +73,21 @@ pmcol = plmct + gpvlo_dot2;
 pmcor = prmct + gpvro_dot2;
 
 %% 陀螺仪替代
-%%一些参量记得单位就可以了，但是这里为什么不对
 pitchParameter = 2.0970;
 sampleDistance = 0.25;
 compf = -1;
 pitch = gypitch;
 for i = 1:length(pitch)
-    pitch(i) = C(pitch(i) , TBS(i));
+    pitch(i) = C(pitch(i) , TBS(i));%%Tbs包含在了C中
 end
 temp = sampleDistance * pitch * compf * pitchParameter;
+temp = 0;
 plmct = - ( temp + amarm );
 prmct = - ( temp - amarm );
 
 % 其余的都是一样的
-% pmcol = plmct + gpvlo_dot2;
-% pmcor = prmct + gpvro_dot2;
+pmcol = plmct + gpvlo_dot2;
+pmcor = prmct + gpvro_dot2;
 
 %% 长波滤波并积分
 zL = longwave_filter(pmcol,281,71,281,491);

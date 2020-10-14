@@ -165,7 +165,7 @@ for i = 1:length(TBS)
 end
 
 sita_c = gpxbr/1638.4/1.03725;
-figure;plot(roll_save/pi*180);hold on;plot(sita_c);legend matlab积分 gj;
+% figure;plot(roll_save/pi*180);hold on;plot(sita_c);legend matlab积分 gj;
 %%这里可以看到漂移比较严重，但是基本可以确定其变化的范围
 
 

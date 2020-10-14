@@ -19,7 +19,7 @@
 close all;
 clear all;
 filepath = 'data/0916_1337_x/';
-start_pos = 1; N = 1e4;
+start_pos = 1e4; N = 1e4;
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);
@@ -42,6 +42,7 @@ ay = fmctrl_data(:,5);      %%gpan
 % ****************参数设定*********************
 delay = 418;%%一直是这个数吗？
 %%这两个参数是啥意思？这两个量是准确的
+%%通过调整的这两个量很难确定物理意义
 G_par = 3.8259e-14*141500.0;
 ht = 3.90398e-05*141500.0*0.268;
 tbs = fmctrl_data(:,end);
@@ -68,24 +69,33 @@ gyroYaw = fmctrl_data(:,6);
 for i = 1:length(gyroYaw)
     gyroYaw_ = gyroYaw(i);
     tbs_ = tbs(i);
-    yaw_Rz(i,1) = C(gyroYaw_ , tbs_);%%为什么需要这个？
+    yaw_Rz(i,1) = C( gyroYaw_ , tbs_ );%%为什么需要这个？
 end
 sampleDistance = 0.25;
 yawParameter = 2.0970;      %% 135751/9.8*6.0135*6.0135/4294.97*pi/180
 %%yawParameter这个参数是怎么得到的？
-gpyawReviseTemp1 = yaw_Rz * yawParameter * sampleDistance*( -1 );
-gpyawRevise = gpyawReviseTemp1 + 0;
-gpyawRevise = zeros(size(gpyawRevise));
-
-camo = - gpyawRevise + ht * sita_b_dot2;
+compf = -1;
+gpyawReviseTemp1 = yaw_Rz * yawParameter * sampleDistance * compf;
+gpyawRevise = gpyawReviseTemp1;
+camo =   - gpyawRevise*(2.8) ;    %% ht * sita_b_dot2 --> marm
+% camo = zeros(size(camo));
 
 %%
-camo = -camo;
+camo = -camo;       
 camo = quzheng(camo);
 amcol = camo + rou_l_dot2;
 amcor = camo - rou_r_dot2;
 
+%% 即便是确定camo的相差达到最小，也不能确定最终的结果相差到最小，这是为什么？
+
 %%
+tp1 = ay_Gz - G_par .* sita_b .* tbs.^2 + ht * sita_b_dot2;
+tp2 =  - gpyawRevise*(2.8) ;
+tperr = tp1 - tp2 ;
+figure;subplot(2,1,1);plot(tp1);
+subplot(2,1,2);plot(tp2);
+figure;plot(tperr);
+
 figure;plot(amcol);hold on;plot(aln(:,3));
 figure; plot( amcol - aln(:,3) ); title('amcol之间的对比');
 
@@ -93,68 +103,18 @@ figure; plot( amcol - aln(:,3) ); title('amcol之间的对比');
 error = amcol ./ aln(:,3);
 
 %%
-plot_mag(ay,'ay');%%有问题
+yL = shortwave_filter(amcol);
 
- %%
-alu = 0;elupp = 0;elup = 0;elu = 0;als = 0;alss = 0;alsss = 0;
-sscal = 0.000825;
-sbsci = 0.019802;
-fscal = 0.1;
-sbsc = 101.000;
-Num = 768;
-amcol_array = zeros(Num,1);
-amcol_arraytmp = zeros(Num,1);
-in1 = 533; in2 = 432; in4=382; in6=331; in7=230;%%这些参数都是固定的，不能变
-in = 539;%%控制偏移值
+%%
+figure;plot(yL,'k','LineWidth',0.5);hold on;plot(aln(:,4),'r--','LineWidth',0.5);legend matlab gj
+figure;plot((yL - aln(:,4)));%%基本完全一致
+% title('左轨向的结果');
 
-%%正常的25m的滤波
-for i = 1:length(amcol)           %%简单积分，肯定是不对的
-    %%
-   amcol_array(in) = amcol(i);
-    %%由此可见就是输入出了问题，所以查找输入
-    %%-----------------------------
-    alu = alu + amcol_array(in1) - 3*amcol_array(in2) + 3*amcol_array(in6) - amcol_array(in7);
-    elupp = alu;
-    elup = elup + elupp;
-    elu = elu + elup;
-    emco = - amcol_array(in4);
-    als = als + amcol_array(in2) - amcol_array(in6);
+
+%% 其余滤波器
+function out = find_multiple(in)
     
-    alss = alss + als + sbsc*emco;
-    alsss = alsss + alss;
-    xtemp = (sbsci*alsss - sscal*elu)*fscal;
-    
-    alsss_save(i) = alsss;
-    elu_save(i) = elu;
-    alss_save(i) = alss;
-    yL(i,1) = xtemp;
-    
-    %% 更新数组
-    in1 = mod(in1,Num)+1;
-    in2 = mod(in2,Num)+1;
-    in4 = mod(in4,Num)+1;
-    in6 = mod(in6,Num)+1;
-    in7 = mod(in7,Num)+1;
-    in = mod(in,Num)+1;
-    %%
-    save(i,1) = alu;
-    save(i,2) = elu;
-    save(i,3) = als;
-    save(i,4) = alsss;
 end
-%%
-% figure;plot(yL,'k','LineWidth',0.5);hold on;plot(aln(:,4),'r','LineWidth',0.5);legend matlab gj
-% figure;plot((yL - aln(:,4)));%%基本完全一致
-title('左轨向的结果');
-%%
-
-%%  
-% guixiang_l = wave_out(:,3);
-% figure;plot(guixiang_l(268:end),'LineWidth',1);
-% hold on;plot(aln(:,4));
-% title('三点滤波的结果');
-
-    
 %% 前端滤波器
 
 function out = C(x_k,tbs)
@@ -265,8 +225,7 @@ for i = 1:length(in)
     end
 end
 end
-
-%% 在长波滤波之后进行积分？
+%% 梯形积分之类的
 function out = integrational(auat)
 persistent  euas euasp  auatp eusa;
 if isempty(euasp)
@@ -286,9 +245,52 @@ auatp = auat;
 euasp = euas;
 
 end
+%% 短波滤波器
+function out = shortwave_filter(in)
+amcol = in;
+%% 25m长波滤波加积分
+alu = 0;elupp = 0;elup = 0;elu = 0;als = 0;alss = 0;alsss = 0;
+sscal = 0.000825;
+sbsci = 0.019802;
+fscal = 0.1;
+sbsc = 101.000;
+% 数组设定
+Num = 768;
+amcol_array = zeros(Num,1);
+amcol_arraytmp = zeros(Num,1);
+in1 = 533; in2 = 432;in4=382;in6=331;in7=230;
+in = 539;
 
-
-
+for i = 1:length(amcol) 
+    amcol_array(in) = amcol(i);
+    alu = alu + amcol_array(in1) - 3*amcol_array(in2) + 3*amcol_array(in6) - amcol_array(in7);
+    elupp = alu;
+    elup = elup + elupp;
+    elu = elu + elup;
+    emco = - amcol_array(in4);
+    als = als + amcol_array(in2) - amcol_array(in6);
+    alss = alss + als;
+    alss = alss + sbsc*emco;
+    alsss = alsss + alss;
+    xtemp = (alsss*sbsci - sscal*elu)*fscal;
+    yL(i,1) = xtemp;
+    
+    %% 更新数组
+    in1 = mod(in1,Num)+1;
+    in2 = mod(in2,Num)+1;
+    in4 = mod(in4,Num)+1;
+    in6 = mod(in6,Num)+1;
+    in7 = mod(in7,Num)+1;
+    in = mod(in,Num)+1;
+    %%
+    save(i,1) = alu;
+    save(i,2) = elu;
+    save(i,3) = als;
+    save(i,4) = alsss;
+end
+%%
+out = yL;
+end
 %% 无意义的代码
 % %% 重新整理积分
 % 

@@ -12,7 +12,7 @@ N=128^2;
 w=linspace(0,pi,N);
 lamda = 2*pi./w./4;
 % 参数配置
-para = winLen_para_set();
+para = winLen_para_set();%%参数设定
 % para(3,:) = [160*2,40*2,169,280];%%word文档中的滤波器参数
 % 获取滤波器参数
 [Acc_TriRec_25, TriDB_TriRec_25, maxV_TriRec_25, minV_TriRec_25, BW_TriRec_25, slope_TriRec_25] = tri_rec_paral_repair(25, para);

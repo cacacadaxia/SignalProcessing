@@ -23,7 +23,7 @@ close all;
 clear all;
 filepath = 'data/0916_1337_x/';
 start_pos = 1;
-N = 9996;
+N = 19969;
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);
@@ -219,14 +219,14 @@ amcor = camo - rou_r_dot2;
         center_pos = center_pos + 1;
         center_pos = find_index(center_pos);
     end
-yL = yL/5;%%除以固定的系数，然后得到轨向的值
+yL = yL * scaleCoef;%%除以固定的系数，然后得到轨向的值
 %%
 % aln(:,4);
 figure;plot([yL(126:end)],'LineWidth',1);hold on;plot(aln(:,4));legend matlab70m gj25m;title('matlab计算的70m长波与25m左轨向对比')
 % figure;plot((yL - aln(:,4)));%%基本完全一致
 %% 这里有个问题，这个延时是怎么确定的？为什么126？是相对于25m波长的126
 
-%% 25m,70m,120m
+%% 25m,70m
 tmp7 = textread([filepath,'LongWaveResultForAln_L.txt']);
 tmp7 = tmp7(start_pos:start_pos+N-1,:);
 longwave25m = tmp7(:,1);
@@ -235,7 +235,8 @@ longwave70m = tmp7(:,2);
 for i = 1:length(yL)
     yL(i) = point3filter(yL(i));
 end
-figure;plot(longwave70m);hold on;plot([zeros(143,1);yL]);legend gj matlab
+figure;plot(longwave70m);hold on;plot([zeros(143,1);yL/1.324]);legend gj matlab;title('70m长波对比');set(gca,'Fontname','Times New Roman','fontsize',16);
+%%也就是说经过我写的滤波器之后有一个幅值与其不一致
 
 
 %% 这里长波的问题就是值太大，而且也不是很对齐啊，难道滤波器的实现还是有问题？
@@ -243,13 +244,13 @@ yL_2 = longwave_filter(amcol,281,71,281,491);
 for i = 1:length(yL_2)
     yL_2(i) = point3filter(yL_2(i));
 end
-figure;plot(longwave70m);hold on;plot([zeros(1,1);yL]);legend gj matlab
+figure;plot(longwave70m);hold on;plot([zeros(143,1);yL/1.324]);legend gj matlab;title('70m长波对比');set(gca,'Fontname','Times New Roman','fontsize',16);
 
 
 %% 观察频谱(这种方法有点问题)
-plot_mag(longwave25m/103,'gj中给出的轨向 25m');
-plot_mag(longwave70m/103,'gj中给出的轨向 70m','hold');
-plot_mag(yL/103,'matlab中给出的轨向 70m','hold');legend gj25m gj70m 70m/matlab;
+% plot_mag(longwave25m/103,'gj中给出的轨向 25m');
+% plot_mag(longwave70m/103,'gj中给出的轨向 70m','hold');
+% plot_mag(yL/103,'matlab中给出的轨向 70m','hold');legend gj25m gj70m 70m/matlab;
 
 
 

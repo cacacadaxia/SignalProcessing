@@ -21,28 +21,29 @@ para = winLen_para_set();%%参数设定
 [Acc_TriRec_120, TriDB_TriRec_120, maxV_TriRec_120, minV_TriRec_120, BW_TriRec_120, slope_TriRec_120] = tri_rec_paral_repair(120, para);
 
 % plot 25
-fig = figure;
+
+figure1 = figure('Color',[1 1 1]);
 semilogx((lamda), ((Acc_TriRec_25)), 'b','LineWidth',2);
 plot_line_func(Acc_TriRec_25,lamda,25);
 xlabel('Wavelength /m')
 ylabel('Magnitude /dB')
 set(gca,'Fontname','Times New Roman','fontsize',14);
 % plot 42
-figure;
+figure1 = figure('Color',[1 1 1]);
 semilogx((lamda), ((Acc_TriRec_42)), 'b','LineWidth',2);
 plot_line_func(Acc_TriRec_42,lamda,42);
 xlabel('Wavelength /m')
 ylabel('Magnitude /dB')
 set(gca,'Fontname','Times New Roman','fontsize',14);
 % plot 70
-figure;
+figure1 = figure('Color',[1 1 1]);
 semilogx((lamda), ((Acc_TriRec_70)), 'b','LineWidth',2);
 plot_line_func(Acc_TriRec_70,lamda,70);
 xlabel('Wavelength /m')
 ylabel('Magnitude /dB')
 set(gca,'Fontname','Times New Roman','fontsize',14);
 % plot 120
-figure;
+figure1 = figure('Color',[1 1 1]);
 semilogx((lamda), ((Acc_TriRec_120)), 'b','LineWidth',2);
 plot_line_func(Acc_TriRec_120,lamda,120);
 xlabel('Wavelength /m')

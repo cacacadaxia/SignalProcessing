@@ -25,7 +25,7 @@ close all;
 
 %%
 start_pos = 1;
-N = 10000;
+N = 5e4;
 tmp2 = textread('Ps3_filter_wx.txt');
 if length(tmp2)>N
     tmp2 = tmp2(start_pos:start_pos+N-1,:);
@@ -137,7 +137,7 @@ end
 % lfcrp = lfcrp/1638.4/180*pi;
 % lfcrp;%%度数
 figure;plot(lfcrp /(0.016932*180/pi) - lfcrp_comp);     %%这一点需要注意一下，与原本程序的区别
-figure; plot(lfcrp / 1638.4);
+figure; plot(lfcrp / 1638.4);title('低频分量');ylabel('度数');set(gca,'Fontname','Times New Roman','fontsize',16);
 %%直接变成的
 
 
@@ -162,7 +162,7 @@ lfcrp_ref = tmp4(:,3);
 %% 应该除以一个系数，这里为什么没有？
 s1 = 246083.654;
 GYRO = GYRO  / 3276.8 / 1.31 * 1638.4; %%转换成为 3276.8*deg/s --> 1638.4*deg/s，积分之后正好结果是deg，结果就与最终对的上了
-hfcra_func = Pz3_gj( GYRO , TBS );
+hfcra_func = Pz3_gj( GYRO , TBS );%%这里包含了几分的量
 figure;plot( hfcra_ref -  hfcra_func );figure;plot( hfcra_ref );hold on;plot( hfcra_func );%%不准
 
 %%
@@ -170,7 +170,26 @@ reslut = hfcra_func + lfcrp / (0.016932*180/pi);%%多了一个这个
 figure;plot(reslut);
 reslut_ref = lfcrp_comp + hfcra_ref;
 hold on;plot(reslut_ref)
-legend matlab gj
+legend matlab gj;
+set(gca,'Fontname','Times New Roman','fontsize',16);
+
+
+%% 陀螺仪直接积分
+s1 = 246083.654;%%这是那来的？
+gpro_ = gpro/s1;
+tbs = TBS/1e5;
+roll = 0;
+for i = 1:length(tbs)
+    roll = roll + tbs(i).*gpro_(i);
+    roll_save(i,1) = roll;
+end
+figure1 = figure('Color',[1 1 1]);plot(roll_save/pi*180,'k--','LineWidth',1);
+sita_c = reslut_ref/1638.4/1.03725;%%这个系数很重要，相当于统一的单位
+hold on;plot(sita_c,'r','LineWidth',1);
+legend 陀螺直接积分 互补滤波
+xlabel('里程 /0.25m')
+ylabel('\theta_b /度')
+set(gca,'Fontname','Times New Roman','fontsize',16);
 
 %%
 

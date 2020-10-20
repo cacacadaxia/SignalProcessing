@@ -20,6 +20,7 @@
 % 
 % 10.14
 %   1. 讨论二阶差分与积分直接的关系；积分实际上也是一种低通滤波的形式
+%   2. 讨论IMU数据的处理
 % 
 %--------------------------------------------------------------------------
 
@@ -59,43 +60,45 @@
 % hold on;
 % plot(d)
 
-%%
-% clear all;
-% close all;
-% del_t = 0.01;
-% t = 1:del_t:100;
-% T = 10; 
-% a = - 4*pi^2/T^2*sin( 2*pi/T*t );
-% v = 2*pi/T;
-% s = 0;
-% for i = 1:length(a)
-%    v(i+1) = v(i) + a(i)*del_t;
-%    s(i+1) = s(i) + v(i)*del_t;
-%   
-% end
-% figure;plot(s);
 
-%%直接积分也会出问题的，那么怎么办？
-%%因为省略了高阶的项，那也不应该啊，咋回事
 
 %% 为什么用二阶差分的方法
 clear all;
 close all;
-del_t = 0.01;
-t = 1:del_t:100;
+del_t = 1/256;
+fs = 1/del_t;
+t = 0:del_t:5;
 T = 10; 
-a = - 4*pi^2/T^2*sin( 2*pi/T*t );
-v = 2*pi/T;
+a = -25*sin( 5*t );
+% a = 2*ones(1,length(t));
+% a = 20*t.^3;
+% a = 9 * exp(3*t);
+v = 5;
 s = 0;
-s_dot = 0;
-for i = 1:length(a)
+s_dot = 0.039062/2;
+for i = 1:length(t)
    tmp = a(i) * del_t * del_t;
    s_dot(i+1) = s_dot(i) + tmp;
    s(i+1) = s(i) + s_dot(i);
+%    v(i+1) = v(i) + a(i)*del_t;
+%    s(i+1) = s(i) + v(i)*del_t;
 end
-figure;plot(s);
+% figure;plot(s(1:end-1) - sin(5*t));
+figure;plot(t , s(1:end-1));
+hold on;
+plot(t, sin(5*t));
 
-%% function 高通滤波器
+%% 结论
+%{
+差分求和的方法适用多项式函数、指数函数，正余弦函数，唯一需要注意的就是，一阶差分需要
+在一个正确的值附近，不然二阶求和就会产生漂移。
+那么怎么分析？
+%}
+
+%% 对比IMU数据的两种积分方法的问题
+
+
+
 
 
 

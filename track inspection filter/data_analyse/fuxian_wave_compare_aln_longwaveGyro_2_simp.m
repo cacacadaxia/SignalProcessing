@@ -19,7 +19,7 @@
 close all;
 clear all;
 filepath = 'data/0916_1337_x/';
-start_pos = 1e4; N = 1e4;
+start_pos = 1e4; N = 5e3;
 load_txt;
 size(wave_out);
 N = length(fmctrl_data);
@@ -65,20 +65,21 @@ end
 camo = ay_Gz -  G_par .* sita_b .* tbs.^2 + ht * sita_b_dot2;
 
 %% 陀螺仪取代
-gyroYaw = fmctrl_data(:,6);
-for i = 1:length(gyroYaw)
-    gyroYaw_ = gyroYaw(i);
-    tbs_ = tbs(i);
-    yaw_Rz(i,1) = C( gyroYaw_ , tbs_ );%%为什么需要这个？
-end
-sampleDistance = 0.25;
-yawParameter = 2.0970;      %% 135751/9.8*6.0135*6.0135/4294.97*pi/180
-%%yawParameter这个参数是怎么得到的？
-compf = -1;
-gpyawReviseTemp1 = yaw_Rz * yawParameter * sampleDistance * compf;
-gpyawRevise = gpyawReviseTemp1;
-camo =   - gpyawRevise*(2.8) ;    %% ht * sita_b_dot2 --> marm
-% camo = zeros(size(camo));
+% gyroYaw = fmctrl_data(:,6);
+% for i = 1:length(gyroYaw)
+%     gyroYaw_ = gyroYaw(i);
+%     tbs_ = tbs(i);
+%     yaw_Rz(i,1) = C( gyroYaw_ , tbs_ );%%为什么需要这个？
+% end
+% sampleDistance = 0.25;
+% yawParameter = 2.0970;      %% 135751/9.8*6.0135*6.0135/4294.97*pi/180
+% %%yawParameter这个参数是怎么得到的？
+% compf = -1;
+% gpyawReviseTemp1 = yaw_Rz * yawParameter * sampleDistance * compf;
+% gpyawRevise = gpyawReviseTemp1;
+% camo =   - gpyawRevise + ht * sita_b_dot2;    %% ht * sita_b_dot2 --> marm
+% % camo = zeros(size(camo));
+% %%显然2.8是不行的
 
 %%
 camo = -camo;       
@@ -86,29 +87,38 @@ camo = quzheng(camo);
 amcol = camo + rou_l_dot2;
 amcor = camo - rou_r_dot2;
 
-%% 即便是确定camo的相差达到最小，也不能确定最终的结果相差到最小，这是为什么？
+%%即便是确定camo的相差达到最小，也不能确定最终的结果相差到最小，这是为什么？
 
-%%
-tp1 = ay_Gz - G_par .* sita_b .* tbs.^2 + ht * sita_b_dot2;
-tp2 =  - gpyawRevise*(2.8) ;
-tperr = tp1 - tp2 ;
-figure;subplot(2,1,1);plot(tp1);
-subplot(2,1,2);plot(tp2);
-figure;plot(tperr);
+%% 对比amcol的值
+% tp1 = ay_Gz - G_par .* sita_b .* tbs.^2 + ht * sita_b_dot2;
+% tp2 =  - gpyawRevise*(2.8) ;
+% tperr = tp1 - tp2 ;
+% figure;subplot(2,1,1);plot(tp1);
+% subplot(2,1,2);plot(tp2);
+% figure;plot(tperr);
 
-figure;plot(amcol);hold on;plot(aln(:,3));
-figure; plot( amcol - aln(:,3) ); title('amcol之间的对比');
+% figure;plot(amcol);hold on;plot(aln(:,3));
+figure; plot( amcol - aln(:,3) ); title('amcol之间的对比');set(gca,'Fontname','Times New Roman','fontsize',16);
 
-%% 分析倍数
-error = amcol ./ aln(:,3);
-
-%%
+%% 短波滤波器
 yL = shortwave_filter(amcol);
 
-%%
-figure;plot(yL,'k','LineWidth',0.5);hold on;plot(aln(:,4),'r--','LineWidth',0.5);legend matlab gj
-figure;plot((yL - aln(:,4)));%%基本完全一致
+%% 画图
+figure1 = figure('Color',[1 1 1]);plot(yL,'k','LineWidth',0.5);hold on;plot(aln(:,4),'r','LineWidth',0.5);legend 陀螺仪取代方法 原方法;set(gca,'Fontname','Times New Roman','fontsize',16);xlabel('里程 /0.25m');ylabel('轨向 / (32768/10 inch)')
+figure1 = figure('Color',[1 1 1]);plot((yL - aln(:,4)));set(gca,'Fontname','Times New Roman','fontsize',16);xlabel('里程 /0.25m');ylabel('轨向 / (32768/10 inch)')
 % title('左轨向的结果');
+
+%% 长波滤波器
+yL_70m = longwave_filter(amcol ,281, 71, 281, 491); %%都是N的值
+tmp7 = textread([filepath,'LongWaveResultForAln_L.txt']);%%25m,70m
+tmp7 = tmp7(start_pos:start_pos+N-1,:);
+longwave25m = tmp7(:,1);
+longwave70m = tmp7(:,2);
+
+figure1 = figure('Color',[1 1 1]);plot(longwave70m);hold on;plot([zeros(143,1);yL_70m]);legend gj matlab;title('70m长波对比');set(gca,'Fontname','Times New Roman','fontsize',16);
+figure1 = figure('Color',[1 1 1]);plot(yL_70m);hold on;plot(yL);legend 陀螺仪取代方法70m 陀螺仪取代方法30m;set(gca,'Fontname','Times New Roman','fontsize',16);xlabel('里程 /0.25m');ylabel('轨向 / (32768/10 inch)')
+figure1 = figure('Color',[1 1 1]);plot(longwave70m);hold on;plot(longwave25m);legend 原方法70m 原方法30m;set(gca,'Fontname','Times New Roman','fontsize',16);xlabel('里程 /0.25m');ylabel('轨向 / (32768/10 inch)')
+
 
 
 %% 其余滤波器
@@ -225,7 +235,7 @@ for i = 1:length(in)
     end
 end
 end
-%% 梯形积分之类的
+%% 梯形积分(from 程)
 function out = integrational(auat)
 persistent  euas euasp  auatp eusa;
 if isempty(euasp)
@@ -291,7 +301,7 @@ end
 %%
 out = yL;
 end
-%% 无意义的代码
+%% else
 % %% 重新整理积分
 % 
 % for i = 1:length(amcol)           %%简单积分，肯定是不对的

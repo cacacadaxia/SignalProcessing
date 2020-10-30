@@ -28,10 +28,10 @@ clear all;
 clc;
 %----------一阶数字抗混叠滤波器------------
 W1 = (10^5)/(2^17);
-v1= 150/36;v2 = 200/9;v3 = 3500/36;
+v1= 16/3.6;v2 = 36/3.6;v3 = 128/3.6;
 T1 = 0.25/v1;T2 = 0.25/v2;T3 = 0.25/v3;
 %semilogx(f1,20*log10(abs(h1)));xlabel('频率（Hz）');ylabel('幅值(dB)');
-figure();suptitle('一阶数字抗混叠+补偿');
+figure1 = figure('Color',[1 1 1]);suptitle('一阶数字抗混叠+补偿');
 b = [ W1*T1 0];
 a = [ 1+W1*T1 (-1)];
 [h1 f1] = freqz(b,a,800000,500);
@@ -69,7 +69,7 @@ semilogx(v3./f1c,20*log10(abs(h1c)),'r');hold on;
 
 %%
 %-----------------一阶数字抗混叠+补偿滤波器-------
-figure;
+figure1 = figure('Color',[1 1 1]);
 B1 = [2*W1*T1+(W1^2)*T1*T1 ,  (W1^2)*T1*T1-2*W1*T1];
 A1 = [2*W1*T1+2*(W1^2)*T1*T1  ,  (-2)*W1*T1];
 [H1 F1] = freqz(B1,A1,800000,500);
@@ -89,9 +89,8 @@ xlabel('波长（m）');ylabel('幅值(dB)');
 
 
 %% 这个不对也是很奇怪
-figure; Cz = h1.*h1c;
-semilogx(v3./F1,20*log10(abs(Cz)),'r');hold on;
-
+% figure; Cz = h1.*h1c;
+% semilogx(v3./F1,20*log10(abs(Cz)),'r');hold on;
 
 %% 换一种表示
 % f = 0.1:0.0001:100;

@@ -51,8 +51,8 @@ ylabel('Magnitude /dB')
 set(gca,'Fontname','Times New Roman','fontsize',14);
 
 
-fprintf('半窗长结果：\n')
-fprintf('\tM_Tri1\tM_Tri2\tM_Rec1\tM_Rec2\n');
+fprintf('全窗长结果：\n')
+fprintf('\tN_Tri1\tN_Tri2\tN_Rec1\tN_Rec2\n');
 fprintf("-------------------------------------------\n")
 list = {'25m','42m','70m','120m'};
 for i = 1:4
@@ -70,25 +70,25 @@ Rec2 = zeros(1,N);
 
 switch (lam)
     case 25
-        M1 = para(1,1);
-        M2 = para(1,2);
-        M3 = para(1,3);
-        M4 = para(1,4);
+        N1 = para(1,1);
+        N2 = para(1,2);
+        N3 = para(1,3);
+        N4 = para(1,4);
     case 42
-        M1 = para(2,1);
-        M2 = para(2,2);
-        M3 = para(2,3);
-        M4 = para(2,4);
+        N1 = para(2,1);
+        N2 = para(2,2);
+        N3 = para(2,3);
+        N4 = para(2,4);
     case 70
-        M1 = para(3,1);
-        M2 = para(3,2);
-        M3 = para(3,3);
-        M4 = para(3,4);
+        N1 = para(3,1);
+        N2 = para(3,2);
+        N3 = para(3,3);
+        N4 = para(3,4);
     case 120
-        M1 = para(4,1);
-        M2 = para(4,2);
-        M3 = para(4,3);
-        M4 = para(4,4);
+        N1 = para(4,1);
+        N2 = para(4,2);
+        N3 = para(4,3);
+        N4 = para(4,4);
 end
         
 %% way 2 (程序中原有的做法)
@@ -101,16 +101,16 @@ end
 % M4 = round(M1*1.5439)*2+1;
 
 % 矩形窗的固有形式
-    M1 = M1/2;
-    M2 = M2/2;
+    M1 = N1/2;
+    M2 = N2/2;
 for i=1:N
 %     三角窗
     Tri1(i)= ((sin(w(i)*M1/2)/sin(w(i)/2))/M1)*((sin(w(i)*M1/2)/sin(w(i)/2))/M1);
     Tri2(i)= ((sin(w(i)*M2/2)/sin(w(i)/2))/M2)*((sin(w(i)*M2/2)/sin(w(i)/2))/M2);
     
 %     矩形窗
-    Rec1(i)= ((sin(w(i)*M3/2)/sin(w(i)/2))/M3);
-    Rec2(i)= ((sin(w(i)*M4/2)/sin(w(i)/2))/M4);
+    Rec1(i)= ((sin(w(i)*N3/2)/sin(w(i)/2))/N3);
+    Rec2(i)= ((sin(w(i)*N4/2)/sin(w(i)/2))/N4);
 end
 % 并联的系数
 MulFilter = 1.036*Tri1-0.036*Tri2+0.25*(Rec1-Rec2);
@@ -143,7 +143,6 @@ Tri1 = 4.4940*lamda-0.2418; Tri1 = CalWinLen(Tri1);
 Tri2 = 1.2341*lamda-0.7893; Tri2 = CalWinLen(Tri2);
 Rec1 = 4.4940*lamda-0.2418; Rec1 = CalWinLen(Rec1);
 Rec2 = 7.8231*lamda-1.6313; Rec2 = CalWinLen(Rec2);
-
 out = [Tri1,Tri2,Rec1,Rec2];
 end
 

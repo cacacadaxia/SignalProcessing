@@ -52,7 +52,6 @@ k_del_F = sin(pitch_k)*L + k_del_B;
 del_fai = ( (k_del_F - k_del_B) - (k_1_del_F - k_1_del_B) )/L;
 pitch_dot = pitch_k - pitch_k_1;
 
-pitch_dot*0.25;
 
 
 

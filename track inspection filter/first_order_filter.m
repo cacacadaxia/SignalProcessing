@@ -6,7 +6,7 @@ omiga1 = 10^5 / 2^17;
 f  = 0.001 : 0.0001 :100;  % 模拟频率Hz
 omiga =  2*pi.*f;         % 模拟角频率 rad/sec
 H = omiga1 ./ (1j.*(omiga) + omiga1);
-figure
+figure1 = figure('Color',[1 1 1]);
 semilogx( f , 20*log10(H) );
 xlabel('模拟频率 (Hz)');
 ylabel('dB');            % 截止频率为 0.76/2/pi = 0.121Hz
@@ -25,9 +25,9 @@ H2 = omiga1 ./ (1j*(2*pi*v.*pesi) + omiga1);
 v  = 128;v = v/3.6;
 H3 = omiga1 ./ (1j*(2*pi*v.*pesi) + omiga1);
 
-figure
+figure1 = figure('Color',[1 1 1]);
 semilogx(lamda,20*log10(H1),lamda,20*log10(H2),lamda,20*log10(H3));
-semilogx(pesi,20*log10(H1),pesi,20*log10(H2),pesi,20*log10(H3));
+% semilogx(pesi,20*log10(H1),pesi,20*log10(H2),pesi,20*log10(H3));
 title ('抗混滤波器空间域频响特性')
 xlabel('空间频率(1/m)' );
 ylabel('幅值(dB)');
@@ -80,15 +80,19 @@ Ti   = 0.25/v;
 par1 = omiga1 * Ti;
 B3 = ( (1+par1/2)-(1-par1/2).*exp(-1j*2*pi.*pesi*v*Ti) ) ./ par1;
 
-figure;
-semilogx(pesi,20*log10(B1),pesi,20*log10(B2),pesi,20*log10(B3));
+% figure;
+hold on
+% semilogx(pesi,20*log10(B1),pesi,20*log10(B2),pesi,20*log10(B3));
+semilogx(lamda,20*log10(B1),lamda,20*log10(B2),lamda,20*log10(B3));
 title ('补偿滤波器空间域频响特性');
 xlabel('空间频率(1/m)' );
 ylabel('幅值(dB)');
 legend('16km/h','36km/h','128km/h');
 
+
+%%
 %模拟抗混滤波器+数字补偿滤波器
-figure
+figure1 = figure('Color',[1 1 1]);
 % semilogx(pesi,20*log10(B1.*H1),pesi,20*log10(B2.*H2),pesi,20*log10(B3.*H3));
 semilogx(lamda,20*log10(B1.*H1),lamda,20*log10(B2.*H2),lamda,20*log10(B3.*H3));
 title ('模拟抗混、数字补偿滤波器空间域频响特性');

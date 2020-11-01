@@ -35,10 +35,10 @@ Rec1 = zeros(1,N);
 Rec2 = zeros(1,N);  
 
 %% 调整窗长
-N1 = 111;
-N2 = 29;
-N3 = 111;
-N4 = 193;
+N1 = 539;
+N2 = 147;
+N3 = 539;
+N4 = 937;
 % 			1571	431	1571	2735	350m
 %% 计算半窗长
 M1 = (N1-1)/2;%%三角窗的半窗长
@@ -63,8 +63,16 @@ Acc_TriRec_70 = ensco1;
 
 figure1 = figure('Color',[1 1 1]);
 semilogx((lamda), ((Acc_TriRec_70)), 'b','LineWidth',2);
-plot_line_func(Acc_TriRec_70,lamda,350);
+plot_line_func(Acc_TriRec_70,lamda,120);
 xlabel('Wavelength /m')
 ylabel('Magnitude /dB')
 set(gca,'Fontname','Times New Roman','fontsize',14);
 
+%%
+b = load('filter_120m.mat');
+[h,f] = freqz(b.Num,[zeros(1,length(b.Num)-1),1],10000,4);
+% figure1 = figure('Color',[1 1 1]);
+semilogx(1./f, abs(h) ,'LineWidth','1');grid on;xlabel('波长 /m');
+ylabel('幅值 /dB')
+set(gca,'Fontname','Times New Roman','fontsize',16);
+legend 窗函数 FIR高阶滤波器

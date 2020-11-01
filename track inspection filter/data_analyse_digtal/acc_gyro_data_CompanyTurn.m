@@ -20,11 +20,11 @@
 
 
 %%
-% close all
+close all
 clear all
 % ¶ÁÈ¡Êý¾Ý
-N = 5e4;
-start_pos = 14;
+N = 5e5;
+start_pos = 1;
 filepath = 'data/0916_1337_x/';
 fmctrl_data = textread([filepath,'fmctrl_data_1337.txt']);
 if length(fmctrl_data)>N

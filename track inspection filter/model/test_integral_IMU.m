@@ -28,9 +28,9 @@ if PLOT
 end
 
 %% 加噪声
-sigma_acc  = 0.001;           % accelerometer noise (m/s^2)
-sigma_gyro = 0.04*pi/180;    % gyroscope noise (rad/s)
-sigma_vel = 0.000;
+sigma_acc  = 0.00001;           % accelerometer noise (m/s^2)
+sigma_gyro = 0.0*pi/180;    % gyroscope noise (rad/s)
+sigma_vel = 0.0001;
 %%complex add noise :randn(2,4).*[100;100000]
 imu_data(1:3,:) = imu_data(1:3,:) + randn(size(imu_data(1:3,:))) * sigma_acc;
 imu_data(4:6,:) = imu_data(4:6,:) + randn(size(imu_data(4:6,:))) * sigma_gyro;
@@ -73,7 +73,7 @@ set(gca,'Fontname','Times New Roman','fontsize',14);
 %%这说明了二阶差分求和与直接两次求和的一致性，在从z函数上来看两者是等价的
 
 %% chapter 1: 中值积分
-gw        = [0, 0, 9.81]';
+gw        = [0, 0, 9.81]'*1e3;
 init_ang  = pos(1,4:6);  %%初始欧拉角
 init_quat = angle2quat(init_ang(3),init_ang(2),init_ang(1));%%初始四元数
 quat      = init_quat';     %%初始角度赋值
@@ -270,7 +270,7 @@ end
 function [imu_data ,  pos , vel ,time ,dt ] = data_gener(end_t)
 dt = 1/256;
 M_PI = 3.1415926;
-gn = [0, 0, -9.81];
+gn = [0, 0, -9.81]*1e3;
 k = 0;
 time = 0:dt:end_t;
 for t = 0:dt:end_t

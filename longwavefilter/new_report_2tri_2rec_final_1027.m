@@ -62,8 +62,8 @@ ylabel('Magnitude /dB')
 set(gca,'Fontname','Times New Roman','fontsize',14);
 % plot 120
 figure1 = figure('Color',[1 1 1]);
-semilogx((lamda), ((Acc_TriRec_120)), 'b','LineWidth',2);
-plot_line_func(Acc_TriRec_120,lamda,120);
+semilogx((lamda), (20*log10(Acc_TriRec_120)), 'b','LineWidth',2);
+% plot_line_func(Acc_TriRec_120,lamda,120);
 xlabel('Wavelength /m')
 ylabel('Magnitude /dB')
 set(gca,'Fontname','Times New Roman','fontsize',14);
@@ -152,7 +152,7 @@ end
 
 function para = winLen_para_set()
 list = [25,42,70,120];
-list = [25,42,70,200];
+% list = [25,42,70,250];
 % list = [25,42,70,3];
 for i = 1:4
     Wavelen = list(i);

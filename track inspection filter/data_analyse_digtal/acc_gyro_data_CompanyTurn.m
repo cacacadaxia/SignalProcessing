@@ -55,6 +55,12 @@ accy = fmctrl_data(:,4)/13852;%%m/s^2
 accz = fmctrl_data(:,7)/13852;%%m/s^2
 TBS = fmctrl_data(:,16)/1e5;
 
+figure;plot(accy);hold on;plot(accx*2);legend 1 2;
+%%这里有一个问题，为什么这里的ax的数据完全是错的？
+%%这一点需要注意。
+%%之后需要将这两者的结果进行对比。
+
+
 %% 加速度计的比较
 
 accx_body = fmctrl_data(:,13)/( 32768/2/9.8 );%%m/s^2
@@ -115,6 +121,8 @@ set(gca,'Fontname','Times New Roman','fontsize',16);
 for i = 2:length(TBS)
     accx_tbs(i) = (v_filter(i)-v_filter(i-1)) / TBS(i);
 end
-% figure;plot(accx_tbs);
+figure;plot(accx_tbs);
+
+
 
 

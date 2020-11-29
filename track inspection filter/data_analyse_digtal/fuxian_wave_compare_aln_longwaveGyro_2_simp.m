@@ -120,7 +120,6 @@ figure1 = figure('Color',[1 1 1]);plot(yL_70m);hold on;plot(yL);legend ÍÓÂİÒÇÈ¡´
 figure1 = figure('Color',[1 1 1]);plot(longwave70m);hold on;plot(longwave25m);legend Ô­·½·¨70m Ô­·½·¨30m;set(gca,'Fontname','Times New Roman','fontsize',16);xlabel('Àï³Ì /0.25m');ylabel('¹ìÏò / (32768/10 inch)')
 
 
-
 %% ÆäÓàÂË²¨Æ÷
 function out = find_multiple(in)
     

@@ -92,7 +92,6 @@ yL = yL * scaleCoef;
 for i = 1:length(yL)
     yL(i) = point3filter(yL(i));
 end
-
 end
 
 

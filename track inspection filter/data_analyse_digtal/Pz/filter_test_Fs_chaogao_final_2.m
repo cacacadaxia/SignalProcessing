@@ -142,7 +142,6 @@ for i = 2:length(result)
     out(i,1) = dtmp_Fz;
     %% next step
 %     1/(0.016932*9.8) * 3276.8 = 19748
-    
     infp = B2( gpin(i)  , tbs);   %%这个B多次使用所以产生影响
     infp_save(i,1) = infp;
     inc = infp + dtmp_Fz;     
@@ -219,6 +218,7 @@ end
 
 function out = F_xiuzheng(x,tbs)
 % 这个F滤波器少了点什么？就是少了x*tbs^2，这一个项
+%%这是程序中的实现
 %% 滤波器设定
 %% 对于x[3]，其与同理
 % x(3)=x_n
@@ -243,6 +243,7 @@ end
 
 function out = F(x,tbs)
 %% 滤波器设定
+%%这是自己重新实现的
 %% 对于x[3]，其与同理
 % x(3)=x_n
 % x(2)=x_n-1

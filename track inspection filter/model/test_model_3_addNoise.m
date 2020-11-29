@@ -1,3 +1,5 @@
+
+
 % =========================================================================
 %
 %                  长波检测方法讨论
@@ -11,7 +13,9 @@
 %--------------------------------------------------------------------------
 %  功能： 1.调整一下不平顺，让其变得复杂一些
 %        2.陀螺主要收到白噪声大小的影响，但是加速度计收到速度影响比较大(JC-21数字化惯性导航系统技术指标JC-21数字化惯性导航系统技术指标.docx)
-%        3. 
+%        3. 这里并没有讨论"两组测距组件"对于结果的影响
+% 
+% 
 %--------------------------------------------------------------------------
 
 clear all;
@@ -39,14 +43,18 @@ v = 100/3.6;
 dt = del_x/v;                                       %%采样时间间隔
 t = 0:dt:(length(x)-1)*dt;
 z_v = f_z_v(t,v);
-% z_acc = f_z_acc(t,v) + randn(1,length(t)) * 1e-4 * 9.8;
-z_acc = f_z_acc(t,v) + randn(1,length(t)) * 0 * 9.8;
+
+%% 加噪声
+sigma_acc = 1e-4 * 9.8  / sqrt(dt);
+z_acc = f_z_acc(t,v);
+z_acc = z_acc + randn(1,length(t)) * sigma_acc;
+
 % figure;plot(z_acc);hold on;plot( f_z_acc(t,v))
 %%对acc加噪声完全不行
 
 %% 加速度计
 z_dot =  wavediff(1)/4;%%有点飘
-z_dot = 6.921463910193095e-04;
+z_dot = 6.921463910193095e-04 - 0.0000001;
 z = 0;
 for i = 1:length(z_acc)
     z_dot = z_dot + z_acc(i)*dt*dt;
@@ -66,21 +74,26 @@ z_ref_2 = longwave_filter(z_acc*dt*dt,111,29,111,193)*5;%%30m
 z_ref_3 = longwave_filter(z_acc*dt*dt,897,245,897,1561)*5;%%200m
 
 figure1 = figure('Color',[1 1 1]);
-% plot(z_ref_1(1:end)*5);hold on;plot( longwave(20:end) );
-% plot(z_ref_3);hold on;plot( longwave(30:end) );
-plot(z_ref_3(1:end));hold on;plot( longwave );
+plot(z_ref_1(1:end));hold on;%plot( longwave(20:end) );
+plot(z_ref_2);hold on;%plot( longwave(30:end) );
+plot(z_ref_3(1:end));%hold on;plot( longwave );
 set(gca,'Fontname','Times New Roman','fontsize',16);
-legend 短波滤波器 参考不平顺 长波滤波器
+legend 30m 30m_2 200m;
+grid on;
 
+%%为什么窗函数滤波器都有一个激变呢？尤其是200m的长波滤波器
+%%这个需要考虑，因为在轨检程序中是没有这个激变的
+% 短波滤波器的误差对比
 l1_1 = z_ref_1(1:end-19)' - longwave(20:end);
-figure;plot(l1_1);
+% figure;plot(l1_1);
+% figure;plot(z_ref_1(1:end-19));hold on;plot(longwave(20:end))
 
 %% 经过fdatool滤波器之后
 % b = load('filter1.mat');
 % tmpN = (length(b.Num)-1)/2;
 % pmcol_70m_tmp = conv(b.Num,z_acc*dt*dt);
 % pmcol_70m_tmp(1:tmpN) = [];pmcol_70m_tmp(end-tmpN+1:end) = [];
-% z_dot = 3.394014695925989e-04;    %%注意这个z_dot这个量，必须要保证一阶差分的初值是没问题的，才可以保证最终的结果，那么之前一直发散，和这个值有很大关系
+% z_dot = 3.394014695925989e-04 + 0.000000017005;    %%注意这个z_dot这个量，必须要保证一阶差分的初值是没问题的，才可以保证最终的结果，那么之前一直发散，和这个值有很大关系
 % zL_70m_fdatool = 0;
 % for i = 1:length(pmcol_70m_tmp)
 %     z_dot = z_dot + pmcol_70m_tmp(i);
@@ -89,7 +102,7 @@ figure;plot(l1_1);
 %     zL_70m_fdatool_save(i) = zL_70m_fdatool;
 % end
 % figure1 = figure('Color',[1 1 1]);plot(zL_70m_fdatool_save+0.01);hold on;plot(longwave);
-% legend fdatool设计的滤波器 窗函数滤波器;set(gca,'Fontname','Times New Roman','fontsize',16);xlabel('里程 /0.25m');ylabel('高低 / (32768/10 inch)');title('70m')
+% legend FIR滤波器 原始波形;set(gca,'Fontname','Times New Roman','fontsize',16);xlabel('里程 /0.25m');ylabel('高低 / (32768/10 inch)');title('70m')
 
 %% 陀螺仪
 % wavediff_k_1 %%w*del_t
@@ -97,8 +110,8 @@ pitch = atan(wavediff);
 wy = ( pitch(2:end) - pitch(1:end-1) )/dt;  %%陀螺仪测出来的数据
 wy = [0,wy ];                               %%这个影响很多
 
-wy = wy + randn(1,length(wy)) * 2.424068405547680e-06;
-% wy = wy + randn(1,length(wy)) * 2.424068405547680e-05;
+sigma_gyro = 1/180*pi/3600 / sqrt(dt);
+wy = wy + randn(1,length(wy)) *sigma_gyro;
 z_dot = wavediff(1)/4;
 z = 0;
 for i = 1:length(wy)
@@ -108,7 +121,8 @@ for i = 1:length(wy)
     z_save(i) = z;
 end
 l2 = z_save - longwave;
-figure1 = figure('Color',[1 1 1]);plot(l2*1e3-0.3,'r');hold on;plot(l1*1e3,'k');legend 陀螺计算二阶差分 加速度计计算二阶差分;
+figure1 = figure('Color',[1 1 1]);plot(l2*1e3-0.3,'r','LineWidth',1);hold on;plot(l1*1e3,'k');legend 陀螺计算二阶差分 加速度计计算二阶差分;
+grid on;
 xlabel('采样点 /0.25m');ylabel('误差 /mm')
 set(gca,'Fontname','Times New Roman','fontsize',16);
 %%从理论上来说这两者应该是相等的，没有太多的差别的
@@ -117,13 +131,19 @@ set(gca,'Fontname','Times New Roman','fontsize',16);
 
 
 %%
-figure1 = figure('Color',[1 1 1]);
-plot(([z_save]- 0.32*1e-3)*1e3);hold on;plot( longwave*1e3);
-legend matlab true
-%%
-% figure;plot(l2*1e3);
-plot_mag(longwave,'不平顺频谱');
-% plot_mag
+% fdatool
+% figure1 = figure('Color',[1 1 1]);
+% plot((zL_70m_fdatool_save - longwave)*1e3);hold on;plot(l2*1e3 );
+% % legend matlab true
+% 窗函数
+figure1 = figure('Color',[1 1 1]);plot(l2*1e3-0.3,'r','LineWidth',1);hold on;plot(l1*1e3,'k');
+plot(l1_1*1e3)
+xlabel('采样点 /0.25m');ylabel('误差 /mm')
+set(gca,'Fontname','Times New Roman','fontsize',16);
+legend 陀螺计算二阶差分 加速度计计算二阶差分 加速度计计算二阶差分经过窗函数滤波器后;
+grid on;
+
+
 
 %% function
 function plot_mag(signal_data , tit , varargin)
@@ -151,7 +171,6 @@ set(gca,'Fontname','Times New Roman','fontsize',16);
 title(tit);
 grid on;
 end
-
 %% 短波滤波器
 function out = shortwave_filter(in)
 amcol = in;

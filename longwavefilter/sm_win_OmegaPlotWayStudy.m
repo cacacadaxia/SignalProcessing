@@ -15,13 +15,15 @@
 %        3. 注意三角窗用M，矩形窗用N，这是正确方法
 %        4.
 %        5.
+% 1120
+%       1.加上两个滤波器及联和并联的对比
 %--------------------------------------------------------------------------
 
 
 %%
 clear all;
 close all;
-lamda = 1:0.1:1000;
+lamda = 1:0.1:10000;
 pesi  = 1./lamda;           %空间域频率
 omega = 2*pi*pesi*0.25;
 
@@ -55,24 +57,29 @@ for i=1:N
 end
 % 并联的系数
 MulFilter = 1.036 * Tri1 - 0.036*Tri2 + 0.25 * (Rec1-Rec2);
-ensco1 = 1 - MulFilter;         %%这个为什么是这样的
+
+% 级联的滤波器
+MulFilter2 = Tri1.*Tri2.*Rec1.*Rec2;
+
+ensco1 = 1 - MulFilter;
+ensco2 = 1 - MulFilter2;
 Acc_TriRec_70 = ensco1;
 
 
 %%
-
 figure1 = figure('Color',[1 1 1]);
-semilogx((lamda), ((Acc_TriRec_70)), 'b','LineWidth',2);
+% semilogx((lamda), ((Acc_TriRec_70)), 'b','LineWidth',2);
 plot_line_func(Acc_TriRec_70,lamda,120);
 xlabel('Wavelength /m')
 ylabel('Magnitude /dB')
 set(gca,'Fontname','Times New Roman','fontsize',14);
-
-%%
-b = load('filter_120m.mat');
-[h,f] = freqz(b.Num,[zeros(1,length(b.Num)-1),1],10000,4);
-% figure1 = figure('Color',[1 1 1]);
-semilogx(1./f, abs(h) ,'LineWidth','1');grid on;xlabel('波长 /m');
-ylabel('幅值 /dB')
-set(gca,'Fontname','Times New Roman','fontsize',16);
-legend 窗函数 FIR高阶滤波器
+hold on;
+plot_line_func(abs(ensco2),lamda,120);
+%% 对比fdatool
+% b = load('filter_120m.mat');
+% [h,f] = freqz(b.Num,[zeros(1,length(b.Num)-1),1],10000,4);
+% % figure1 = figure('Color',[1 1 1]);
+% semilogx(1./f, abs(h) ,'LineWidth','1');grid on;xlabel('波长 /m');
+% ylabel('幅值 /dB')
+% set(gca,'Fontname','Times New Roman','fontsize',16);
+% legend 窗函数 FIR高阶滤波器

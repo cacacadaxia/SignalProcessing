@@ -131,14 +131,14 @@ for i = 2:length(result)
     yaw_dotp = yaw_dot;
     %%
     %%在dtemp多处理了0.016932，在gpin中少处理了0.016932。同时如果转换成为rad的话，那么又少了180/pi转换成为deg
-    %%两个值相抵消，那么就多出了(0.016932*180/pi)==0.97这样的一个倍数
+    %%两个值相抵消，那么就多出了(0.016932*180/pi) == 0.97这样的一个倍数
+    %%这一点需要注意，但是没必要这么纠结
     
 end
 % lfcrp = lfcrp/1638.4/180*pi;
 % lfcrp;%%度数
 figure;plot(lfcrp /(0.016932*180/pi) - lfcrp_comp);     %%这一点需要注意一下，与原本程序的区别
 figure; plot(lfcrp / 1638.4);title('低频分量');ylabel('度数');set(gca,'Fontname','Times New Roman','fontsize',16);
-%%直接变成的
 
 
 %% % wx,tbs,hfcra,t4,...

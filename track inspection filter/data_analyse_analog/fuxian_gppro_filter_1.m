@@ -111,12 +111,6 @@ set(gca,'Fontname','Times New Roman','fontsize',16);grid on
 hold on;plot(zL120mref(504:end)/129.01)
 legend FIR 窗函数
 
-%% 寻找峰值的那个点
-l1 = z_save/129.01/5 + 6;
-out = conv(zL120mref/129.01 , l1(end:-1:1));
-[~,index] = max(out);
-index = index - length(l1);
-figure;plot(out);
 
 
 %% 函数

@@ -129,7 +129,6 @@ for i=1:N
 %     Èý½Ç´°
     Tri1(i)= ((sin(omega(i)*M1/2)/sin(omega(i)/2))/M1)*((sin(omega(i)*M1/2)/sin(omega(i)/2))/M1);
     Tri2(i)= ((sin(omega(i)*M2/2)/sin(omega(i)/2))/M2)*((sin(omega(i)*M2/2)/sin(omega(i)/2))/M2);
-    
 %     ¾ØÐÎ´°
     Rec1(i)= ((sin(omega(i)*N3/2)/sin(omega(i)/2))/N3);
     Rec2(i)= ((sin(omega(i)*N4/2)/sin(omega(i)/2))/N4);

@@ -11,7 +11,7 @@
 %--------------------------------------------------------------------------
 %  功能： 1.看起来是两个矩形窗及联的
 %        2.留下100m波长以上的，因为要计算曲率，就是要选择更长波长的
-%        3. 
+%        3. 就是低通滤波器，直接用窗函数就可以实现了
 %--------------------------------------------------------------------------
 
 clear all;
@@ -36,22 +36,26 @@ DjpesiDz =     ( temp.^K - temp.^(-K-1) )...
            ./( ( 1- temp.^(-1) ) .^2) ...
             /M /N ;
 
+
 %% 画图
 
-figure
-semilogx( 1./pesi , 20*log10(DjpesiDz) );
-xlabel('波长');
-ylabel('dB');
+figure1 = figure('Color',[1 1 1]);
+semilogx( 1./pesi , 20*log10(DjpesiDz) ,'LineWidth',1);
+xlabel('\lambda m');
+ylabel('Mag dB');
 title ('曲率低通滤波器');
+set(gca,'Fontname','Times New Roman','fontsize',14);
+grid on;
 
-figure;
-semilogx( pesi , 20*log10(DjpesiDz) );
-xlabel('Ψ（1/m）');
-ylabel('dB');
+figure1 = figure('Color',[1 1 1]);
+semilogx( pesi , 20*log10(DjpesiDz) ,'LineWidth',1 );
+xlabel('\psi（1/m）');
+ylabel('Mag dB');
 title ('曲率低通滤波器');
+set(gca,'Fontname','Times New Roman','fontsize',14);
+grid on;
 
-
-%%
+%% 新的方法
 
 % %方法2
 % M = 77;

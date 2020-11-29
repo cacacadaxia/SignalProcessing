@@ -28,9 +28,9 @@ if PLOT
 end
 
 %% º”‘Î…˘
-sigma_acc  = 0.00001;           % accelerometer noise (m/s^2)
+sigma_acc  = 0.0000;           % accelerometer noise (m/s^2)
 sigma_gyro = 0.0*pi/180;    % gyroscope noise (rad/s)
-sigma_vel = 0.0001;
+sigma_vel = 0.000;
 %%complex add noise :randn(2,4).*[100;100000]
 imu_data(1:3,:) = imu_data(1:3,:) + randn(size(imu_data(1:3,:))) * sigma_acc;
 imu_data(4:6,:) = imu_data(4:6,:) + randn(size(imu_data(4:6,:))) * sigma_gyro;

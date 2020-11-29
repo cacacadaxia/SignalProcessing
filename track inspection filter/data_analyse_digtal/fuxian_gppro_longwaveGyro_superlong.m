@@ -114,22 +114,22 @@ zR_250m = longwave_filter(pmcor,1123,307,1123,1953);
 % figure1 = figure('Color',[1 1 1]);plot(zL_250m);hold on;plot(zR_250m);set(gca,'Fontname','Times New Roman','fontsize',16);
 
 %% fdatool 设计高通滤波器
-% b = load('filter1.mat');%%70m的长波
+b = load('filter1.mat');%%70m的长波
 % b = load('filter_250m.mat');%%250m长波
 % b = load('filter_300m.mat');%%300m长波
 % b = load('filter_400m.mat');%%400m长波
-b = load('filter_1000m.mat');%%1000m长波
+% b = load('filter_1000m.mat');%%1000m长波
 
 
 tmpN = (length(b.Num)-1)/2;
 pmcol_70m_tmp = conv(b.Num,pmcol);
 pmcol_70m_tmp(1:tmpN) = [];pmcol_70m_tmp(end-tmpN+1:end) = [];%%去除暂态点之后
-% z_dot = -9.6;   %%70m长波参数
+z_dot = -9.6;   %%70m长波参数
 % z_dot = -19.7;%%250m
 % z_dot = -4.7;%%300m
-z_dot = -52.7;%%400m
+% z_dot = -52.7;%%400m
 % z_dot = -261;%%250m 加速度计
-z_dot = -132;
+% z_dot = -132;
 zL_70m_fdatool = 0;
 for i = 1:length(pmcol_70m_tmp)
     z_dot = z_dot + pmcol_70m_tmp(i);
@@ -168,11 +168,12 @@ zL_ref70m = tmp3(:,3);
 % ratio = 1; figure1 = figure('Color',[1 1 1]);plot(ratio.*zL_70m);hold on;plot(zL_ref70m(177:end));legend 陀螺仪取代方法 原方法;set(gca,'Fontname','Times New Roman','fontsize',16);xlabel('里程 /0.25m');ylabel('高低 / (32768/10 inch)');title('70m')
 
 %% 查看频谱，怎么感觉有点问题
-% plot_mag(yL_ref30m,'25m')
-% plot_mag(yL_ref70m,'70m','hold')
-% legend 1 2
+plot_mag(yL_ref30m,'25m')
+plot_mag(yL_ref70m,'70m','hold')
+legend 1 2
 
-%% 300m的桥里面有1200个点(假设这里是一个300m的桥，但是实际上这样考虑并不是很合理，因为)
+%% 300m的桥里面有1200个点(假设这里是一个300m的桥，但是实际上这样考虑并不是很合理，因为
+% 并不能保证一开始的就是桥墩的位置，只能假设)
 % % 300m-->1200
 % start = 4000;
 % z_dot = 0;
@@ -205,6 +206,11 @@ zL_ref70m = tmp3(:,3);
 % % plot(z_save);hold on;plot(yL_ref70m(start:start+len-1));
 % % xlabel('采样点 /0.25m');ylabel('数值 /32768/10 inch');set(gca,'Fontname','Times New Roman','fontsize',16);
 
+
+
+
+
+% plot_mag()
 %% 画图的函数
 function plot_for_paper()
 % figure1 = figure('Color',[1 1 1]);plot( -zL_70m_fdatool_save/5/129.01);hold on;plot(zL_70m(247:end)/129.01);
@@ -334,8 +340,6 @@ y(2) = ( y(1) *2^17 + tbs*x )/(2^17 + tbs);
 y(1) = y(2);
 out = y(2);
 end
-
-
 %% 短波滤波器
 function out = shortwave_filter(in)
 amcol = in;
